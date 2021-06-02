@@ -1,17 +1,18 @@
 require('dotenv').config()
+var preferences = require('./userPreferences');
 
 const WolframAlphaAPI = require('wolfram-alpha-api');
 const waApi = WolframAlphaAPI(process.env.WOLFRAM_APPID);
 
-// waApi.getShort("weather South Bend Indiana")
-// .then(console.log)
-// .catch(console.error);
+const wolframGetShort = function(message) {
+  const queryString = message.content.substring(3);
 
+  const userPreferences = preferences.getPreference(`${message.author.username}#${message.author.discriminator}`);
+  console.log('got:', userPreferences);
 
-const wolframGetShort = function(queryString) {
   const result = waApi.getShort(  {
     i: queryString,
-    units: 'nonmetric',
+    units: userPreferences.units,
   });
 
   return result;

@@ -46,7 +46,8 @@ client.on('message', message => {
   }
 
   if (message.content.startsWith(WOLFRAM_PREFIX)) {
-    wolfram.wolframGetShort(message.content.substring(3))
+    console.log('message:', message);
+    wolfram.wolframGetShort(message)
     .then(res => message.reply(res))
     .catch(err => console.log('error:', err))
     return;
