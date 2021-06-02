@@ -11,6 +11,10 @@
   "license": "ISC",
   "dependencies": {
     "discord.js": "^12.5.3",
-    "dotenv": "^8.2.0"
+    "dotenv": "^8.2.0",
+    "wolfram-alpha-api": "https://products.wolframalpha.com/api/libraries/javascript/wolfram-alpha-api-1.0.0-rc.1.tgz"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
   }
 }
