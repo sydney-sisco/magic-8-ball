@@ -1,8 +1,11 @@
 require('dotenv').config()
+var wolfram = require('./features/wolfram');
+
 const Discord = require("discord.js");
 const client = new Discord.Client();
 
 const PREFIX = '!8';
+const WOLFRAM_PREFIX = '!8?';
 
 const divinations = [
   'It is certain.',
@@ -42,8 +45,16 @@ client.on('message', message => {
     return;
   }
 
+  if (message.content.startsWith(WOLFRAM_PREFIX)) {
+    wolfram.wolframGetShort(message.content.substring(3))
+    .then(res => message.reply(res))
+    .catch(err => console.log('error:', err))
+    return;
+  }
+
   if (message.content.startsWith(PREFIX)) {
     message.reply(`🎱 ${scry()} 🎱`);
+    return;
   }
 
 });
