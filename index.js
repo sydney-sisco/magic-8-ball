@@ -49,7 +49,10 @@ client.on('message', message => {
     console.log('message:', message);
     wolfram.wolframGetShort(message)
     .then(res => message.reply(res))
-    .catch(err => console.log('error:', err))
+    .catch(err => {
+      message.reply(err.toString())
+    })
+    .catch(err => console.log('what?',err))
     return;
   }
 
