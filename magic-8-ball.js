@@ -3,6 +3,22 @@ require('dotenv').config()
 const Discord = require("discord.js");
 const client = new Discord.Client();
 
+// not finished or implemented
+const commands = {
+  scry: {
+    prefix: '!8',
+    desc: 'Seek advice about your future. Usage: "!8 `<your cosmic query>`"'
+  },
+  computationalIntelligence: {
+    prefix: '!7',
+    desc: 'Harness the power of computational intelligence "!7 `<query>`"'
+  },
+  moonPhase: {
+    prefix: '!moon',
+    desc: 'Show moon phase'
+  }
+}
+
 const PREFIX = '!8';
 
 const wolfram = require('./features/wolfram');
