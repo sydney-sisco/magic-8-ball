@@ -5,7 +5,7 @@ const Discord = require("discord.js");
 const client = new Discord.Client();
 
 const PREFIX = '!8';
-const WOLFRAM_PREFIX = '!8?';
+const WOLFRAM_PREFIX = '!7';
 
 const divinations = [
   'It is certain.',
