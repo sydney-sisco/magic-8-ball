@@ -30,11 +30,18 @@ module.exports = {
   getMoonPhase
 };
 
-
+// 🌒 Waxing Crescent Moon
 // 🌓 First Quarter Moon
+// 🌔 Waxing Gibbous Moon
 // 🌕 Full Moon
+// 🌖 Waning Gibbous Moon
 // 🌗 Last Quarter Moon
+// 🌘 Waning Crescent Moon
 // 🌑 New Moon
 
 // 🌝 Full Moon Face
 // 🌚 New Moon Face
+// 🌛 First Quarter Moon Face
+// 🌜 Last Quarter Moon Face
+
+// 🌙 Crescent Moon
