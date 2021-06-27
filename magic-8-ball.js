@@ -1,11 +1,15 @@
 require('dotenv').config()
-var wolfram = require('./features/wolfram');
 
 const Discord = require("discord.js");
 const client = new Discord.Client();
 
 const PREFIX = '!8';
+
+const wolfram = require('./features/wolfram');
 const WOLFRAM_PREFIX = '!7';
+
+const moon = require('./features/sunCalc');
+const MOON_PREFIX = '!moon';
 
 const divinations = [
   'It is certain.',
@@ -43,6 +47,12 @@ client.on('message', message => {
   // ignore messages sent by bots
   if (message.author.bot) {
     return;
+  }
+
+  if (message.content.startsWith(MOON_PREFIX)) {
+    const moonData = moon.getMoonPhase(message);
+
+    message.reply(moonData);
   }
 
   if (message.content.startsWith(WOLFRAM_PREFIX)) {
