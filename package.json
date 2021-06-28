@@ -1,6 +1,9 @@
 {
   "name": "magic-8-ball",
   "version": "1.0.0",
+  "engines": {
+    "node": "12.x"
+  },
   "description": "",
   "main": "magic-8-ball.js",
   "scripts": {
