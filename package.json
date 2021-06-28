@@ -2,7 +2,7 @@
   "name": "magic-8-ball",
   "version": "1.0.0",
   "engines": {
-    "node": "14.x"
+    "node": "12.x"
   },
   "description": "",
   "main": "magic-8-ball.js",
@@ -21,6 +21,7 @@
     "wolfram-alpha-api": "https://products.wolframalpha.com/api/libraries/javascript/wolfram-alpha-api-1.0.0-rc.1.tgz"
   },
   "devDependencies": {
+    "jest": "^27.0.3",
     "nodemon": "^2.0.7"
   }
 }
