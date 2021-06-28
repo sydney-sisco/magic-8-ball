@@ -8,7 +8,8 @@
   "main": "magic-8-ball.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon ."
+    "dev": "nodemon .",
+    "start": "node magic-8-ball.js"
   },
   "keywords": [],
   "author": "",
