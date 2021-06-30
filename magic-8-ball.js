@@ -69,9 +69,9 @@ client.on('message', message => {
   }
 
   if (message.content.startsWith(WEATHER_PREFIX)) {
-    const weatherData = weather.getWeather(message);
-
-    message.reply(moonData);
+    const weatherData = weather.getWeather(message)
+    .then(data => message.reply(data))
+    .catch(err => console.log('err:', err));
   }
 
   if (message.content.startsWith(MOON_PREFIX)) {
