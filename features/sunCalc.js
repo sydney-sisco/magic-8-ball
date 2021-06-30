@@ -3,6 +3,10 @@ const SunCalc = require('suncalc');
 const getMoonPhase = message => {
   const moonData = SunCalc.getMoonIllumination(new Date());
   console.log('moonData:', moonData);
+  console.log('message:', message.content);
+
+  let verbose = false;
+  if (message.content === '!moon -v') verbose = true;
 
   let phaseName = '';
   let phaseEmoji = '';
@@ -37,7 +41,7 @@ const getMoonPhase = message => {
 
   let fraction = (moonData.fraction * 100).toFixed(0);
 
-  return `${phaseName} (${fraction}%) ${phaseEmoji}`;
+  return `${phaseName} (${fraction}%) ${phaseEmoji}${verbose ? `\n> phase (0 - 1): ${moonData.phase.toFixed(4)}\n> illuminated fraction: ${(moonData.fraction * 100).toFixed(2)}%` : ''}`;
 }
 
 module.exports = {
