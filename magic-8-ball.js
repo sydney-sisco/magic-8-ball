@@ -71,7 +71,7 @@ client.on('message', message => {
   if (message.content.startsWith(WEATHER_PREFIX)) {
     const weatherData = weather.getWeather(message)
     .then(data => message.reply(data))
-    .catch(err => console.log('err:', err));
+    .catch(err => message.reply(err.toString()));
   }
 
   if (message.content.startsWith(MOON_PREFIX)) {
@@ -81,7 +81,6 @@ client.on('message', message => {
   }
 
   if (message.content.startsWith(WOLFRAM_PREFIX)) {
-    console.log('message:', message);
     wolfram.wolframGetShort(message)
     .then(res => message.reply(res))
     .catch(err => {
