@@ -27,6 +27,9 @@ const WOLFRAM_PREFIX = '!7';
 const moon = require('./features/sunCalc');
 const MOON_PREFIX = '!moon';
 
+const weather = require('./features/weather');
+const WEATHER_PREFIX = '!weather';
+
 const divinations = [
   'It is certain.',
   'It is decidedly so.',
@@ -63,6 +66,12 @@ client.on('message', message => {
   // ignore messages sent by bots
   if (message.author.bot) {
     return;
+  }
+
+  if (message.content.startsWith(WEATHER_PREFIX)) {
+    const weatherData = weather.getWeather(message);
+
+    message.reply(moonData);
   }
 
   if (message.content.startsWith(MOON_PREFIX)) {
