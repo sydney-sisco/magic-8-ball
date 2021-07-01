@@ -22,10 +22,27 @@ const getWeather = message => {
   
       resolve(`weather data for ${location}:
       > temp: ${smart.temp.toFixed(0)}°C
-      > description: ${smart.description}
+      > description: ${smart.description} ${getWeatherEmoji(smart.weathercode)}
       > humidity ${smart.humidity}%`);
     });
   });
+}
+
+const getWeatherEmoji = weatherCode => {
+
+  let weatherEmoji = weatherEmojis[weatherCode];
+
+  // console.log('weatherEmojis[weatherCode]', weatherEmojis[weatherCode], weatherCode);
+
+  return  weatherEmoji ? weatherEmoji : '';
+}
+
+const weatherEmojis = {
+  800: '☀️',
+  801: '🌤️',
+  802: '⛅',
+  803: '🌥️',
+  804: '☁️',
 }
 
 module.exports = {
