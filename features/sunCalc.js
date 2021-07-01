@@ -2,8 +2,6 @@ const SunCalc = require('suncalc');
 
 const getMoonPhase = message => {
   const moonData = SunCalc.getMoonIllumination(new Date());
-  console.log('moonData:', moonData);
-  console.log('message:', message.content);
 
   let verbose = false;
   if (message.content === '!moon -v') verbose = true;
