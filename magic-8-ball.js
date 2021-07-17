@@ -87,9 +87,19 @@ client.on('message', message => {
     .then(res => {
       console.log(res);
       console.log(res.name);
-      console.log(res.sprites.front_default);
+      console.log(res.sprites);
+      console.log(res.stats);
 
-      message.reply(`${res.name}`, {files: [res.sprites.front_default]});
+      const stats = Object.keys(res.stats);
+      
+      
+      message.reply(`
+#${res.id} **${res.name}** ${res.genera}`
+// Types: ${res.types.map(type => type.name).join(', ')}
+// Stats:
+// ${stats.map(stat => `${stat}:\t ${res.stats[stat]}`).join('\n')}
+// `
+      , {files: [res.sprites.front_default]});
       
     })
     .catch(console.log);
