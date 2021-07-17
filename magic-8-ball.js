@@ -3,6 +3,8 @@ require('dotenv').config()
 const Discord = require("discord.js");
 const client = new Discord.Client();
 
+var shortUrl = require('node-url-shortener');
+
 // not finished or implemented
 const commands = {
   scry: {
@@ -82,7 +84,16 @@ client.on('message', message => {
 
   if (message.content.startsWith(WOLFRAM_PREFIX)) {
     wolfram.wolframGetShort(message)
-    .then(res => message.reply(res))
+    .then(res => {
+      console.log('res:', res);
+
+      const url = `https://www.wolframalpha.com/input/?i=${encodeURI(message.content.substring(3))}`;
+      
+      shortUrl.short(url, function(err, url){
+        console.log(url);
+        message.reply(`${res}\nSee more: ${url}`)
+      });
+    })
     .catch(err => {
       message.reply(err.toString())
     })
