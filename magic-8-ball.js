@@ -82,7 +82,7 @@ client.on('message', message => {
       console.log(res.name);
       console.log(res.sprites.front_default);
 
-      message.channel.send(res.name, {files: [res.sprites.front_default]});
+      message.reply(`${res.name}`, {files: [res.sprites.front_default]});
       
     })
     .catch(console.log);
