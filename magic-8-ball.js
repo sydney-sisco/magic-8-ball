@@ -66,7 +66,7 @@ client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
 
-client.on('message', message => {
+client.on('message', async message => {
   
   // ignore messages sent by bots
   if (message.author.bot) {
@@ -77,34 +77,70 @@ client.on('message', message => {
     var pokemon = message.content.substring(POKEMON_PREFIX.length + 1);
     Pokemon.setLanguage('english');
 
+
     if (pokemon.toLowerCase() === 'missingno') {
-      message.reply(`
-#̶͍̭͇̈̋͊͊̓͘͝͝?̵̢̛̦̱͍̳̯͍̲̺̟̘͗͑̈́̈́̃͋͋́̾̿̓͛̈́̿̕͘͠͝͠͝?̵̢̤͎͈͖͚͖̪͍̗͈̂̑͗́̊̍̆͂̚̕̚͝?̷̨̢̩̻̗̫̱̦͉̹̞̱̟͕̳͓͓̹̫͓͂̀̀̐͊̄̀̋͒̆͒̏̈́̀̉̒̐̓̈́͆͝ͅḾ̸̢̭̼̟͇͉̲̦̦́i̸̧̡̢̨͖̜̩̠̦̹͉͈̺͜͜͝s̴͓̰͛̋̎͊̆̎̊̽͑̋͌͌͘s̵̤̞̩̺̠̹̪̠̀̋́͆̈͋͊́͋͋͘̚i̷̝̣̱̒̏̈́̾͛̃̍̆̈͐̈́͐͆̕͝n̶̼̭͎̘̫̙̲̂̋͑ḡ̷̢͖͇͕̯̖͓͋͑̾̎͌̐͂̋̂̚̚͜N̴̦̖͙̪̭̪͌̃̈͛͋̐̐̋̅̓̍̐̚͠ǫ̷̲͉͔̘̮̼͎͉͓͇̙̪̈́̃ͅ.̶̢̡͎͙̼̪̠̦͔̰̖͖͓̙̲̋̌̃͋
-`
-      , { files: ['https://i.imgur.com/qOjN3AO.gif'] });
+      const embed = new Discord.MessageEmbed()
+      .setColor('#0099ff')
+      .setTitle(`#̶͍̭͇̈̋͊͊̓͘͝͝?̵̢̛̦̱͍̳̯͍̲̺̟̘͗͑̈́̈́̃͋͋́̾̿̓͛̈́̿̕͘͠͝͠͝?̵̢̤͎͈͖͚͖̪͍̗͈̂̑͗́̊̍̆͂̚̕̚͝?̷̨̢̩̻̗̫̱̦͉̹̞̱̟͕̳͓͓̹̫͓͂̀̀̐͊̄̀̋͒̆͒̏̈́̀̉̒̐̓̈́͆͝ͅḾ̸̢̭̼̟͇͉̲̦̦́i̸̧̡̢̨͖̜̩̠̦̹͉͈̺͜͜͝s̴͓̰͛̋̎͊̆̎̊̽͑̋͌͌͘s̵̤̞̩̺̠̹̪̠̀̋́͆̈͋͊́͋͋͘̚i̷̝̣̱̒̏̈́̾͛̃̍̆̈͐̈́͐͆̕͝n̶̼̭͎̘̫̙̲̂̋͑ḡ̷̢͖͇͕̯̖͓͋͑̾̎͌̐͂̋̂̚̚͜N̴̦̖͙̪̭̪͌̃̈͛͋̐̐̋̅̓̍̐̚͠ǫ̷̲͉͔̘̮̼͎͉͓͇̙̪̈́̃ͅ.̶̢̡͎͙̼̪̠̦͔̰̖͖͓̙̲̋̌̃͋`)
+      .setDescription(`??? Pokémon
+      Type: b̴̧̡̘͇͚̣̆̓̈́̂̍̈͝ͅḯ̴͎̓r̶̫̹͎̳͑̓̐̈́̈́̂d̴̹͚̈́̂̋̾,̸̝̩̮̫͙̩̋̉ ̵̞̒̂̓̀̅̕͝ͅn̶̢̘̼̻͊̓o̵̡̨̰̳̻̩͇̫̲̒͛̏̽̍̊́r̶͕̬̮̰̯̗̭̳̟̽͂̓̈̎m̵̗̳̘͎̈́̊͛̅̇ậ̴̙̬̤̀́̃́̕l̸̤̮̾̈̀̃̒̎̂͝`)
+      .setImage('https://i.imgur.com/qOjN3AO.gif')
+
+      const msg = await message.reply( embed );
+
+
+
+
+
+
+
+    
+      setTimeout(() => {
+        const charizardEmbed = new Discord.MessageEmbed()
+        .setColor('#0099ff')
+        .setTitle(`#6 **Charizard**`)
+        .setDescription(`Flame Pokémon
+        Type: fire, flying`)
+        .setImage('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png')
+        msg.edit(charizardEmbed);
+
+        setTimeout(() => {
+          msg.edit(embed);
+          setTimeout(() => {
+            const pikachuEmbed = new Discord.MessageEmbed()
+            .setColor('#0099ff')
+            .setTitle(`#25 **Pikachu**`)
+            .setDescription(`Mouse Pokémon
+            Type: electric`)
+            .setImage('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png')
+            msg.edit(pikachuEmbed);
+          }, 2222);
+        }, 1111);
+
+
+      }, 3333);
 
       return;
     }
     
     Pokemon.getPokemon(pokemon)
     .then(res => {
-      console.log(res);
-      console.log(res.name);
-      console.log(res.sprites);
-      console.log(res.stats);
-
       const stats = Object.keys(res.stats);
-      
-      message.reply(`
-#${res.id} **${res.name}** ${res.genera}`
-// Types: ${res.types.map(type => type.name).join(', ')}
-// Stats:
-// ${stats.map(stat => `${stat}:\t ${res.stats[stat]}`).join('\n')}
-// `
-      , {files: [res.sprites.front_default]});
-      
+
+      const embed = new Discord.MessageEmbed()
+      .setColor('#0099ff')
+      .setTitle(`#${res.id} **${res.name}**`)
+      .setDescription(`${res.genera}
+      Type: ${res.types.map(type => type.name).join(', ')}`)
+      .setImage(res.sprites.front_default)
+
+      message.reply( embed );
     })
-    .catch(console.log);
+    .catch(err => { 
+      console.log(err);
+      message.reply(`${err}`);
+    }
+    );
   }
 
   if (message.content.startsWith(WEATHER_PREFIX)) {
