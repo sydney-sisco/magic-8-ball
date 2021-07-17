@@ -32,6 +32,9 @@ const MOON_PREFIX = '!moon';
 const weather = require('./features/weather');
 const WEATHER_PREFIX = '!weather';
 
+const Pokemon = require('pokemon.js');
+POKEMON_PREFIX = '!pokemon';
+
 const divinations = [
   'It is certain.',
   'It is decidedly so.',
@@ -68,6 +71,21 @@ client.on('message', message => {
   // ignore messages sent by bots
   if (message.author.bot) {
     return;
+  }
+
+  if (message.content.startsWith(POKEMON_PREFIX)) {
+    var pokemon = message.content.substring(POKEMON_PREFIX.length + 1);
+    Pokemon.setLanguage('english');
+    Pokemon.getPokemon(pokemon)
+    .then(res => {
+      console.log(res);
+      console.log(res.name);
+      console.log(res.sprites.front_default);
+
+      message.channel.send(res.name, {files: [res.sprites.front_default]});
+      
+    })
+    .catch(console.log);
   }
 
   if (message.content.startsWith(WEATHER_PREFIX)) {
