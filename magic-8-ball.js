@@ -33,7 +33,7 @@ const weather = require('./features/weather');
 const WEATHER_PREFIX = '!weather';
 
 const Pokemon = require('pokemon.js');
-POKEMON_PREFIX = '!pokemon';
+POKEMON_PREFIX = '!p';
 
 const divinations = [
   'It is certain.',
@@ -75,7 +75,14 @@ client.on('message', message => {
 
   if (message.content.startsWith(POKEMON_PREFIX)) {
     var pokemon = message.content.substring(POKEMON_PREFIX.length + 1);
-    Pokemon.setLanguage('english');
+
+    if (pokemon.startsWith('-p ')) { 
+      pokemon = pokemon.substring(3);
+      Pokemon.setLanguage('japanese');
+    } else {
+      Pokemon.setLanguage('english');
+    }
+
     Pokemon.getPokemon(pokemon)
     .then(res => {
       console.log(res);
