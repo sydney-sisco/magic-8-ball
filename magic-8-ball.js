@@ -75,14 +75,17 @@ client.on('message', message => {
 
   if (message.content.startsWith(POKEMON_PREFIX)) {
     var pokemon = message.content.substring(POKEMON_PREFIX.length + 1);
+    Pokemon.setLanguage('english');
 
-    if (pokemon.startsWith('-p ')) { 
-      pokemon = pokemon.substring(3);
-      Pokemon.setLanguage('japanese');
-    } else {
-      Pokemon.setLanguage('english');
+    if (pokemon.toLowerCase() === 'missingno') {
+      message.reply(`
+#̶͍̭͇̈̋͊͊̓͘͝͝?̵̢̛̦̱͍̳̯͍̲̺̟̘͗͑̈́̈́̃͋͋́̾̿̓͛̈́̿̕͘͠͝͠͝?̵̢̤͎͈͖͚͖̪͍̗͈̂̑͗́̊̍̆͂̚̕̚͝?̷̨̢̩̻̗̫̱̦͉̹̞̱̟͕̳͓͓̹̫͓͂̀̀̐͊̄̀̋͒̆͒̏̈́̀̉̒̐̓̈́͆͝ͅḾ̸̢̭̼̟͇͉̲̦̦́i̸̧̡̢̨͖̜̩̠̦̹͉͈̺͜͜͝s̴͓̰͛̋̎͊̆̎̊̽͑̋͌͌͘s̵̤̞̩̺̠̹̪̠̀̋́͆̈͋͊́͋͋͘̚i̷̝̣̱̒̏̈́̾͛̃̍̆̈͐̈́͐͆̕͝n̶̼̭͎̘̫̙̲̂̋͑ḡ̷̢͖͇͕̯̖͓͋͑̾̎͌̐͂̋̂̚̚͜N̴̦̖͙̪̭̪͌̃̈͛͋̐̐̋̅̓̍̐̚͠ǫ̷̲͉͔̘̮̼͎͉͓͇̙̪̈́̃ͅ.̶̢̡͎͙̼̪̠̦͔̰̖͖͓̙̲̋̌̃͋
+`
+      , { files: ['https://i.imgur.com/qOjN3AO.gif'] });
+
+      return;
     }
-
+    
     Pokemon.getPokemon(pokemon)
     .then(res => {
       console.log(res);
@@ -91,7 +94,6 @@ client.on('message', message => {
       console.log(res.stats);
 
       const stats = Object.keys(res.stats);
-      
       
       message.reply(`
 #${res.id} **${res.name}** ${res.genera}`
