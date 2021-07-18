@@ -19,6 +19,8 @@ const WEATHER_PREFIX = '!weather';
 const Pokemon = require('pokemon.js');
 POKEMON_PREFIX = '!p';
 
+const {log} = require('./features/logging');
+
 const divinations = [
   'It is certain.',
   'It is decidedly so.',
@@ -51,11 +53,13 @@ client.on('ready', () => {
 });
 
 client.on('message', async message => {
-  
   // ignore messages sent by bots
   if (message.author.bot) {
     return;
   }
+
+  // collect anonymous metadata about the message
+  log(message);
 
   if (message.content.startsWith(POKEMON_PREFIX)) {
     var pokemon = message.content.substring(POKEMON_PREFIX.length + 1);

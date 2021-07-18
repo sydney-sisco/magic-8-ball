@@ -3,7 +3,7 @@ var AWS = require("aws-sdk");
 
 AWS.config.update({
   region: process.env.DYNAMODB_REGION,
-  endpoint: process.env.DYNAMODB_ENDPOINT
+  endpoint: process.env.DYNAMODB_ENDPOINT ? process.env.DYNAMODB_ENDPOINT : undefined,
 });
 
 var dynamodb = new AWS.DynamoDB();
