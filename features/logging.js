@@ -16,6 +16,7 @@ const log = message => {
     content: {
       content: message.content,
       type: message.type,
+      channel: message.channel.id,
     }
   };
 
