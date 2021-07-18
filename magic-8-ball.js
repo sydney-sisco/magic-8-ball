@@ -85,27 +85,36 @@ client.on('message', async message => {
       .setDescription(`??? Pokémon\nType: b̴̧̡̘͇͚̣̆̓̈́̂̍̈͝ͅḯ̴͎̓r̶̫̹͎̳͑̓̐̈́̈́̂d̴̹͚̈́̂̋̾,̸̝̩̮̫͙̩̋̉ ̵̞̒̂̓̀̅̕͝ͅn̶̢̘̼̻͊̓o̵̡̨̰̳̻̩͇̫̲̒͛̏̽̍̊́r̶͕̬̮̰̯̗̭̳̟̽͂̓̈̎m̵̗̳̘͎̈́̊͛̅̇ậ̴̙̬̤̀́̃́̕l̸̤̮̾̈̀̃̒̎̂͝`)
       .setImage('https://i.imgur.com/qOjN3AO.gif')
 
+      const notFoundEmbed = new Discord.MessageEmbed()
+      .setColor('#0099ff')
+      .setTitle(`#?? **Error!**`)
+      .setDescription(`Pokémon not found\nType: N/A`)
+      .setImage('https://i.imgur.com/OsdTZnR.png')
+
+      const pikachuEmbed = new Discord.MessageEmbed()
+      .setColor('#0099ff')
+      .setTitle(`#25 **Pikachu**`)
+      .setDescription(`Mouse Pokémon
+      Type: electric`)
+      .setImage('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png')
+
+      const charizardEmbed = new Discord.MessageEmbed()
+      .setColor('#0099ff')
+      .setTitle(`#6 **Charizard**`)
+      .setDescription(`Flame Pokémon
+      Type: fire, flying`)
+      .setImage('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png')
+
       const msg = await message.reply( embed );
 
       setTimeout(() => {
-        const charizardEmbed = new Discord.MessageEmbed()
-        .setColor('#0099ff')
-        .setTitle(`#6 **Charizard**`)
-        .setDescription(`Flame Pokémon
-        Type: fire, flying`)
-        .setImage('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png')
         msg.edit(charizardEmbed);
 
         setTimeout(() => {
           msg.edit(embed);
+          
           setTimeout(() => {
-            const pikachuEmbed = new Discord.MessageEmbed()
-            .setColor('#0099ff')
-            .setTitle(`#25 **Pikachu**`)
-            .setDescription(`Mouse Pokémon
-            Type: electric`)
-            .setImage('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png')
-            msg.edit(pikachuEmbed);
+            msg.edit(notFoundEmbed);
           }, 2222);
         }, 1111);
       }, 3333);
