@@ -15,6 +15,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "aws-sdk": "^2.948.0",
     "discord.js": "^12.5.3",
     "dotenv": "^8.2.0",
     "node-url-shortener": "^2.0.0",
