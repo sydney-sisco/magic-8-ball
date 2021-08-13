@@ -107,12 +107,9 @@ const getReminders = (client) => {
           // mark reminder as completed
           markCompleted(item);
         });
-
-
-
       }
     });
-   }, 5000);
+   }, 30 * 1000);
 }
 
 
