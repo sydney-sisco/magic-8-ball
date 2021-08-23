@@ -12,9 +12,7 @@ This bot can do more than just see the future! The current list of features incl
 - Computational Intelligence (via [Wolfram Alpha](https://www.wolframalpha.com))
 - Moon phase
 - Weather (via [Open Weather API](https://openweathermap.org/api))
+- Pokédex lookup (via [PokéAPI](https://pokeapi.co))
 - Slackbot-style scheduled reminders
 
-![wolfram](https://github.com/sydney-sisco/magic-8-ball/blob/main/docs/wolfram.png?raw=true)
-![moon](https://github.com/sydney-sisco/magic-8-ball/blob/main/docs/moon.png?raw=true)
-![weather](https://github.com/sydney-sisco/magic-8-ball/blob/main/docs/weather.png?raw=true)
-![pokemon](https://github.com/sydney-sisco/magic-8-ball/blob/main/docs/pokemon.png?raw=true)
+![features](https://github.com/sydney-sisco/magic-8-ball/blob/main/docs/features.png?raw=true)
