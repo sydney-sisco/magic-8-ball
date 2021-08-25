@@ -15,4 +15,5 @@ This bot can do more than just see the future! The current list of features incl
 - Pokédex lookup (via [PokéAPI](https://pokeapi.co))
 - Slackbot-style scheduled reminders
 
+![can snakes jump?](https://github.com/sydney-sisco/magic-8-ball/blob/main/docs/snek.png?raw=true)
 ![features](https://github.com/sydney-sisco/magic-8-ball/blob/main/docs/features.png?raw=true)
