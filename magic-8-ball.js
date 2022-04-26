@@ -3,7 +3,7 @@ require('dotenv').config()
 const Discord = require("discord.js");
 const client = new Discord.Client();
 
-var shortUrl = require('node-url-shortener');
+// var shortUrl = require('node-url-shortener');
 
 const PREFIX = '!8';
 
@@ -153,14 +153,15 @@ client.on('message', async message => {
   if (message.content.startsWith(WOLFRAM_PREFIX)) {
     wolfram.wolframGetShort(message)
     .then(res => {
-      console.log('res:', res);
+      // console.log('res:', res);
 
-      const url = `https://www.wolframalpha.com/input/?i=${encodeURI(message.content.substring(3))}`;
+      // const url = `https://www.wolframalpha.com/input/?i=${encodeURI(message.content.substring(3))}`;
       
-      shortUrl.short(url, function(err, url){
-        console.log(url);
-        message.reply(`${res}\nSee more: ${url}`)
-      });
+      // shortUrl.short(url, function(err, url){
+      //   console.log(url);
+      //   message.reply(`${res}\nSee more: ${url}`)
+      // });
+      message.reply(res)
     })
     .catch(err => {
       message.reply(err.toString())
