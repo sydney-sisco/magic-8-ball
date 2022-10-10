@@ -51,10 +51,13 @@ const findNextFullMoon = () => {
   let phase = Math.round(SunCalc.getMoonIllumination(date).phase * 100) / 100;
 
   // if the current phase is not a full moon, increment the date by 6 hours and check again
-  while (phase !== 0.50) {
+  while (phase !== 0.5) {
     date = new Date(date.getTime() + 6 * 60 * 60 * 1000);
     phase = Math.round(SunCalc.getMoonIllumination(date).phase * 100) / 100;
   }
+
+  // add 6 more hours to the date to get a more accurate result
+  date = new Date(date.getTime() + 6 * 60 * 60 * 1000);
 
   return date.toString().substring(0, 10);
 }
