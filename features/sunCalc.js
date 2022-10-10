@@ -39,7 +39,24 @@ const getMoonPhase = message => {
 
   let fraction = (moonData.fraction * 100).toFixed(0);
 
-  return `${phaseName} (${fraction}%) ${phaseEmoji}${verbose ? `\n> phase (0 - 1): ${moonData.phase.toFixed(4)}\n> illuminated fraction: ${(moonData.fraction * 100).toFixed(2)}%` : ''}`;
+  return `${phaseName} (${fraction}%) ${phaseEmoji}\nNext full moon: ${findNextFullMoon()}${verbose ? `\n> phase (0 - 1): ${moonData.phase.toFixed(4)}\n> illuminated fraction: ${(moonData.fraction * 100).toFixed(2)}%` : ''}`;
+}
+
+
+// search for the date of the next full moon in incrememnts of 6 hours
+const findNextFullMoon = () => {
+
+  // get the current moon phase
+  let date = new Date();
+  let phase = Math.round(SunCalc.getMoonIllumination(date).phase * 100) / 100;
+
+  // if the current phase is not a full moon, increment the date by 6 hours and check again
+  while (phase !== 0.50) {
+    date = new Date(date.getTime() + 6 * 60 * 60 * 1000);
+    phase = Math.round(SunCalc.getMoonIllumination(date).phase * 100) / 100;
+  }
+
+  return date.toString().substring(0, 10);
 }
 
 module.exports = {
