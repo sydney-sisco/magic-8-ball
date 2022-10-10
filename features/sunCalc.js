@@ -9,27 +9,27 @@ const getMoonPhase = message => {
   let phaseName = '';
   let phaseEmoji = '';
 
-  const phase = moonData.phase.toFixed(2);
+  const phase = Math.round(moonData.phase * 100) / 100;
 
-  if (phase == 0.00) {
+  if (phase === 0.0) {
     phaseName = 'New Moon';
     phaseEmoji = '🌑';
   } else if (phase < 0.25) {
     phaseName = 'Waxing Crescent';
     phaseEmoji = '🌒'
-  } else if (phase == 0.25) {
+  } else if (phase === 0.25) {
     phaseName = 'First Quarter';
     phaseEmoji = '🌓';
   } else if (phase < 0.5) {
     phaseName =  'Waxing Gibbous';
     phaseEmoji = '🌔';
-  } else if (phase == 0.5) {
+  } else if (phase === 0.5) {
     phaseName = 'Full Moon';
     phaseEmoji = '🌕';
   } else if (phase < 0.75) {
     phaseName = 'Waning Gibbous';
     phaseEmoji = '🌖'
-  } else if (phase == 0.75) {
+  } else if (phase === 0.75) {
     phaseName = 'Last Quarter';
     phaseEmoji = '🌗';
   } else {
