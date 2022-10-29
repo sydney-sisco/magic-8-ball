@@ -1,7 +1,16 @@
 require('dotenv').config()
 
-const Discord = require("discord.js");
-const client = new Discord.Client();
+// const Discord = require("discord.js");
+const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
+
+// const client = new Discord.Client();
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+  ],
+});
 
 // var shortUrl = require('node-url-shortener');
 
@@ -58,7 +67,7 @@ client.on('ready', () => {
   // getReminders(client);
 });
 
-client.on('message', async message => {
+client.on('messageCreate', async message => {
   // ignore messages sent by bots
   if (message.author.bot) {
     return;
