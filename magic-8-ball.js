@@ -87,25 +87,25 @@ client.on('messageCreate', async message => {
 
 
     if (pokemon.toLowerCase() === 'missingno') {
-      const missingNoEmbed = new Discord.MessageEmbed()
+      const missingNoEmbed = new EmbedBuilder()
       .setColor('#0099ff')
       .setTitle('#̶͍̭͇̈̋͊͊̓͘͝͝?̵̢̛̦̱͍̳̯͍̲̺̟̘͗͑̈́̈́̃͋͋́̾̿̓͛̈́̿̕͘͠͝͠͝?̵̢̤͎͈͖͚͖̪͍̗͈̂̑͗́̊̍̆͂̚̕̚͝?̷̨̢̩̻̗̫̱̦͉̹̞̱̟͕̳͓͓̹̫͓͂̀̀̐͊̄̀̋͒̆͒̏̈́̀̉̒̐̓̈́͆͝ͅḾ̸̢̭̼̟͇͉̲̦̦́i̸̧̡̢̨͖̜̩̠̦̹͉͈̺͜͜͝s̴͓̰͛̋̎͊̆̎̊̽͑̋͌͌͘s̵̤̞̩̺̠̹̪̠̀̋́͆̈͋͊́͋͋͘̚i̷̝̣̱̒̏̈́̾͛̃̍̆̈͐̈́͐͆̕͝n̶̼̭͎̘̫̙̲̂̋͑ḡ̷̢͖͇͕̯̖͓͋͑̾̎͌̐͂̋̂̚̚͜N̴̦̖͙̪̭̪͌̃̈͛͋̐̐̋̅̓̍̐̚͠ǫ̷̲͉͔̘̮̼͎͉͓͇̙̪̈́̃ͅ.̶̢̡͎͙̼̪̠̦͔̰̖͖͓̙̲̋̌̃͋')
       .setDescription('??? Pokémon\nType: b̴̧̡̘͇͚̣̆̓̈́̂̍̈͝ͅḯ̴͎̓r̶̫̹͎̳͑̓̐̈́̈́̂d̴̹͚̈́̂̋̾,̸̝̩̮̫͙̩̋̉ ̵̞̒̂̓̀̅̕͝ͅn̶̢̘̼̻͊̓o̵̡̨̰̳̻̩͇̫̲̒͛̏̽̍̊́r̶͕̬̮̰̯̗̭̳̟̽͂̓̈̎m̵̗̳̘͎̈́̊͛̅̇ậ̴̙̬̤̀́̃́̕l̸̤̮̾̈̀̃̒̎̂͝')
       .setImage('https://i.imgur.com/qOjN3AO.gif')
 
-      const notFoundEmbed = new Discord.MessageEmbed()
+      const notFoundEmbed = new EmbedBuilder()
       .setColor('#0099ff')
       .setTitle('#?? **Error!**')
       .setDescription('Pokémon not found\nType: N/A')
       .setImage('https://i.imgur.com/OsdTZnR.png')
 
-      const pikachuEmbed = new Discord.MessageEmbed()
+      const pikachuEmbed = new EmbedBuilder()
       .setColor('#0099ff')
       .setTitle('#25 **Pikachu**')
       .setDescription('Mouse Pokémon/nType: electric')
       .setImage('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png')
 
-      const charizardEmbed = new Discord.MessageEmbed()
+      const charizardEmbed = new EmbedBuilder()
       .setColor('#0099ff')
       .setTitle('#6 **Charizard**')
       .setDescription('Flame Pokémon\nType: fire, flying')
@@ -132,14 +132,14 @@ client.on('messageCreate', async message => {
     .then(res => {
       const stats = Object.keys(res.stats);
 
-      const embed = new Discord.MessageEmbed()
+      const embed = new EmbedBuilder()
       .setColor('#0099ff')
       .setTitle(`#${res.id} **${res.name}**`)
       .setDescription(`${res.genera}
       Type: ${res.types.map(type => type.name).join(', ')}`)
       .setImage(res.sprites.front_default)
 
-      message.reply( embed );
+      message.reply({ embeds: [embed] } );
     })
     .catch(err => { 
       console.log(err);
