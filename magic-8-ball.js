@@ -19,11 +19,11 @@ const WEATHER_PREFIX = '!weather';
 const Pokemon = require('pokemon.js');
 const POKEMON_PREFIX = '!p';
 
-const {log} = require('./features/logging');
+// const {log} = require('./features/logging');
 
-const {setReminder, getReminders} = require('./features/reminders');
-const { getPreference } = require('./features/userPreferences');
-const REMINDER_PREFIX = '!r';
+// const {setReminder, getReminders} = require('./features/reminders');
+// const { getPreference } = require('./features/userPreferences');
+// const REMINDER_PREFIX = '!r';
 
 const divinations = [
   'It is certain.',
@@ -55,7 +55,7 @@ const scry = () => {
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
-  getReminders(client);
+  // getReminders(client);
 });
 
 client.on('message', async message => {
@@ -65,11 +65,12 @@ client.on('message', async message => {
   }
 
   // collect anonymous metadata about the message
-  log(message);
+  // log(message);
 
-  if(message.content.startsWith(REMINDER_PREFIX)) {
-    setReminder(message);
-  }
+
+  // if(message.content.startsWith(REMINDER_PREFIX)) {
+  //   setReminder(message);
+  // }
 
   if (message.content.startsWith(POKEMON_PREFIX)) {
     var pokemon = message.content.substring(POKEMON_PREFIX.length + 1);
