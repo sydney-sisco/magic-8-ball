@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "aws-sdk": "^2.948.0",
+    "didyoumean": "^1.2.2",
     "discord.js": "^14.6.0",
     "dotenv": "^8.2.0",
     "openweather-apis": "^4.4.1",

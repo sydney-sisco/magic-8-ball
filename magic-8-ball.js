@@ -12,6 +12,10 @@ const client = new Client({
   ],
 });
 
+const didYouMean = require('didyoumean');
+// import pokemonNames from './data/pokemon-list-en.js';
+const pokemonNames = require('./data/pokemon-list-en.js');
+
 // var shortUrl = require('node-url-shortener');
 
 const PREFIX = '!8';
@@ -130,16 +134,21 @@ client.on('messageCreate', async message => {
     
     Pokemon.getPokemon(pokemon)
     .then(res => {
-      const stats = Object.keys(res.stats);
-
-      const embed = new EmbedBuilder()
-      .setColor('#0099ff')
-      .setTitle(`#${res.id} **${res.name}**`)
-      .setDescription(`${res.genera}
-      Type: ${res.types.map(type => type.name).join(', ')}`)
-      .setImage(res.sprites.front_default)
-
-      message.reply({ embeds: [embed] } );
+      if (res) {
+        const stats = Object.keys(res.stats);
+  
+        const embed = new EmbedBuilder()
+        .setColor('#0099ff')
+        .setTitle(`#${res.id} **${res.name}**`)
+        .setDescription(`${res.genera}
+        Type: ${res.types.map(type => type.name).join(', ')}`)
+        .setImage(res.sprites.front_default)
+  
+        message.reply({ embeds: [embed] } );
+      } else {
+        const potentialMatch = didYouMean(pokemon, pokemonNames);
+        message.reply(`Did you mean ${potentialMatch}?`);
+      }
     })
     .catch(err => { 
       console.log(err);
