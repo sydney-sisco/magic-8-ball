@@ -6,7 +6,8 @@
   "scripts": {
     "test": "jest",
     "dev": "nodemon .",
-    "start": "node magic-8-ball.js"
+    "start": "node magic-8-ball.js",
+    "debug": "nodemon --inspect magic-8-ball.js"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +17,7 @@
     "didyoumean": "^1.2.2",
     "discord.js": "^14.6.0",
     "dotenv": "^8.2.0",
+    "openai": "^3.1.0",
     "openweather-apis": "^4.4.1",
     "pokemon.js": "^1.1.8",
     "suncalc": "^1.8.0",

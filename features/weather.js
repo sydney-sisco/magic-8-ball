@@ -6,7 +6,7 @@ weather.setLang('en');
 weather.setUnits('metric');
 
 const getWeather = message => {
-  const location = message.content.slice(9);
+  const location = message.content.slice(9); // export const WEATHER_PREFIX = '!weather '; and 9 is the length of '!weather '
   weather.setCity(location);
 
   return new Promise((resolve, reject) => {

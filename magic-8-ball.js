@@ -32,6 +32,8 @@ const WEATHER_PREFIX = '!weather';
 const Pokemon = require('pokemon.js');
 const POKEMON_PREFIX = '!p';
 
+const {GPT3_PREFIX, gpt3} = require('./features/gpt3');
+
 // const {log} = require('./features/logging');
 
 // const {setReminder, getReminders} = require('./features/reminders');
@@ -84,6 +86,17 @@ client.on('messageCreate', async message => {
   // if(message.content.startsWith(REMINDER_PREFIX)) {
   //   setReminder(message);
   // }
+
+  if (message.content.startsWith(GPT3_PREFIX)) {
+
+    const result = await gpt3(message);
+
+    if (!result) {
+      return;
+    }
+
+    message.reply(result);
+  }
 
   if (message.content.startsWith(POKEMON_PREFIX)) {
     var pokemon = message.content.substring(POKEMON_PREFIX.length + 1);
@@ -147,6 +160,11 @@ client.on('messageCreate', async message => {
         message.reply({ embeds: [embed] } );
       } else {
         const potentialMatch = didYouMean(pokemon, pokemonNames);
+
+        if (!potentialMatch) {
+          return;
+        }
+
         message.reply(`Did you mean ${potentialMatch}?`);
       }
     })
