@@ -53,6 +53,8 @@ const gpt3 = async (message) => {
     stop: [" Human:", " AI:"],
   });
 
+  console.log(response);
+
   if (response.data.error) {
     console.log(response.data.error);
     return response.data.error.message
