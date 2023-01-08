@@ -38,20 +38,21 @@ const humanIdentifier = `\nHuman: `;
 const aiIdentifier = '\nAI: ';
 const context = [];
 const prompt = `The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.\n${humanIdentifier}Hello, who are you?${aiIdentifier}I am an AI created by OpenAI. How can I help you today?`;
-context.push(prompt);
 
 const gpt3 = async (message) => {
   const userPrompt = message.content.slice(GPT3_PREFIX.length).trim();
-  const temperature = 0.9;
-  const maxTokens = 150;
+  // const temperature = 0.9;
+  // const maxTokens = 150;
 
-  context.push(`${humanIdentifier}${userPrompt}`);
+  manageContext(userPrompt);
+
+  // context.push(`${humanIdentifier}${userPrompt}`);
 
   let response;
   try {
     response = await openai.createCompletion({
       model: "text-davinci-003",
-      prompt: `${context}${aiIdentifier}`,
+      prompt: `${prompt}${context}${aiIdentifier}`,
       temperature: 0.9,
       max_tokens: 150,
       top_p: 1,
@@ -78,9 +79,18 @@ const gpt3 = async (message) => {
 
   // const gptMessage = response.data.choices[0].text;
 
-
   return `${gptMessage}`;
 }
+
+const manageContext = userPrompt => {
+  if (context.length > 25) {
+    context.shift();
+  }
+  
+  context.push(`${humanIdentifier}${userPrompt}`);
+}
+
+
 
 module.exports = {
   GPT3_PREFIX,
