@@ -83,7 +83,7 @@ const gpt3 = async (message) => {
 }
 
 const manageContext = userPrompt => {
-  if (context.length > 25) {
+  if (context.length > 10) {
     context.shift();
   }
   
