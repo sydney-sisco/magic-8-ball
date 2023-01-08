@@ -42,16 +42,21 @@ const gpt3 = async (message) => {
   // const prompt = `The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.\n\nHuman: ${userPrompt}`;
   const prompt = `The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.\n\nHuman: Hello, who are you?\nAI: I am an AI created by OpenAI. How can I help you today?\nHuman: ${userPrompt}\nAI: `;
 
-  const response = await openai.createCompletion({
-    model: "text-davinci-003",
-    prompt: prompt,
-    temperature: 0.9,
-    max_tokens: 150,
-    top_p: 1,
-    frequency_penalty: 0,
-    presence_penalty: 0.6,
-    stop: [" Human:", " AI:"],
-  });
+  let response;
+  try {
+    response = await openai.createCompletion({
+      model: "text-davinci-003",
+      prompt: prompt,
+      temperature: 0.9,
+      max_tokens: 150,
+      top_p: 1,
+      frequency_penalty: 0,
+      presence_penalty: 0.6,
+      stop: [" Human:", " AI:"],
+    });
+  } catch (error) {
+    console.log(error);
+  }
 
   console.log(response);
 
