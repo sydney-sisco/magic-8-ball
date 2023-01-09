@@ -1,8 +1,11 @@
+const { EmbedBuilder } = require('discord.js');
 const { Configuration, OpenAIApi } = require("openai");
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
 });
 const openai = new OpenAIApi(configuration);
+
+const { getOptions } = require('../util/shared-helpers.js');
 
 const GPT3_PREFIX = '!!';
 
@@ -12,7 +15,38 @@ const context = [];
 const cannedPrompt = `The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.\n${humanIdentifier}Hello, who are you?${aiIdentifier}I am an AI created by OpenAI. How can I help you today?`;
 
 const gpt3 = async (message) => {
-  const userPrompt = message.content.slice(GPT3_PREFIX.length).trim();
+  const userPromptWithOptions = message.content.slice(GPT3_PREFIX.length).trim();
+  const [userPrompt, options] = getOptions(userPromptWithOptions);
+
+  if (options) {
+    let response;
+    let image_url;
+    try {
+      response = await openai.createImage({
+        prompt: userPrompt,
+        n: 1,
+        size: "256x256",
+      });
+      console.log(response);
+      image_url = response.data.data[0].url;
+    } catch (error) {
+      console.log(error);
+    }
+
+    if (response.status !== 200) {
+      console.log(response.statusText, response.data);
+      return 'API Error';
+    }
+
+    const imageEmbed = new EmbedBuilder()
+      .setTitle(`DALL·E Image: ${userPrompt}`)
+      .setImage(image_url)
+      .setColor('#0099ff')
+      .setTimestamp();
+
+    message.reply({ embeds: [imageEmbed] });
+    return;
+  }
 
   manageContext(userPrompt);
 
