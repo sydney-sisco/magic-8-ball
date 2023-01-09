@@ -4,55 +4,23 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
-// const prompt = `The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.`;
-// const temperature = 0.9;
-// const maxTokens = 150;
-// (async () => {
-//   const gptResponse = await openai.complete({
-//     engine: 'davinci',
-//     prompt: 'this is a test',
-//     maxTokens: 5,
-//     temperature: 0.9,
-//     topP: 1,
-//     presencePenalty: 0,
-//     frequencyPenalty: 0,
-//     bestOf: 1,
-//     n: 1,
-//     stream: false,
-//     stop: ['\n', "testing"]
-//   });
-
-//   console.log(gptResponse.data);
-// })();
-
-// The following is a conversation with an AI assistant.The assistant is helpful, creative, clever, and very friendly.
-
-//   Human: Hello, who are you ?
-//   AI: I am an AI created by OpenAI.How can I help you today ?
-//   Human: 
-
-
 const GPT3_PREFIX = '!!';
 
 const humanIdentifier = `\nHuman: `;
 const aiIdentifier = '\nAI: ';
 const context = [];
-const prompt = `The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.\n${humanIdentifier}Hello, who are you?${aiIdentifier}I am an AI created by OpenAI. How can I help you today?`;
+const cannedPrompt = `The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.\n${humanIdentifier}Hello, who are you?${aiIdentifier}I am an AI created by OpenAI. How can I help you today?`;
 
 const gpt3 = async (message) => {
   const userPrompt = message.content.slice(GPT3_PREFIX.length).trim();
-  // const temperature = 0.9;
-  // const maxTokens = 150;
 
   manageContext(userPrompt);
-
-  // context.push(`${humanIdentifier}${userPrompt}`);
 
   let response;
   try {
     response = await openai.createCompletion({
       model: "text-davinci-003",
-      prompt: `${prompt}${context}${aiIdentifier}`,
+      prompt: `${cannedPrompt}${context}${aiIdentifier}`,
       temperature: 0.9,
       max_tokens: 150,
       top_p: 1,
@@ -66,19 +34,14 @@ const gpt3 = async (message) => {
 
   console.log(response);
 
-  if (response.data.error) {
-    console.log(response.data.error);
-    return response.data.error.message
+  if (response.status !== 200) {
+    console.log(response.statusText, response.data);
+    return 'API Error';
   }
 
-  console.log(response.data.choices[0].text);
-
-  context.push(`${aiIdentifier}${response.data.choices[0].text.trim()}`);
-
   const gptMessage = response.data.choices[0].text.trim();
-
-  // const gptMessage = response.data.choices[0].text;
-
+  console.log('gptMessage:', gptMessage);
+  context.push(`${aiIdentifier}${gptMessage}`);
   return `${gptMessage}`;
 }
 
