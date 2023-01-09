@@ -21,7 +21,7 @@ const gpt3 = async (message) => {
   if (options.includes('i')) {
 
     if (userPrompt.length > 256) {
-      message.reply('Prompt must be less than 256 characters');
+      message.reply(`Prompt must be less than 256 characters. Yours was ${userPrompt.length} characters.`);
       return;
     }
 
