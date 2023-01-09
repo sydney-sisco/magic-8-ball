@@ -15,8 +15,10 @@ const context = [];
 const cannedPrompt = `The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.\n${humanIdentifier}Hello, who are you?${aiIdentifier}I am an AI created by OpenAI. How can I help you today?`;
 
 const gpt3 = async (message) => {
+  const member = message.member.id;
   const userPromptWithOptions = message.content.slice(GPT3_PREFIX.length).trim();
   const [userPrompt, options] = getOptions(userPromptWithOptions);
+
 
   if (options.includes('i')) {
 
@@ -32,6 +34,7 @@ const gpt3 = async (message) => {
         prompt: userPrompt,
         n: 1,
         size: "512x512",
+        user: member,
       });
       console.log(response);
       image_url = response.data.data[0].url;
@@ -74,6 +77,7 @@ const gpt3 = async (message) => {
       frequency_penalty: 0,
       presence_penalty: 0.6,
       stop: [" Human:", " AI:"],
+      user: member,
     });
   } catch (error) {
     console.log('error:', error);
