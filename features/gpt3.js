@@ -18,14 +18,14 @@ const gpt3 = async (message) => {
   const userPromptWithOptions = message.content.slice(GPT3_PREFIX.length).trim();
   const [userPrompt, options] = getOptions(userPromptWithOptions);
 
-  if (options) {
+  if (options.includes('i')) {
     let response;
     let image_url;
     try {
       response = await openai.createImage({
         prompt: userPrompt,
         n: 1,
-        size: "256x256",
+        size: "512x512",
       });
       console.log(response);
       image_url = response.data.data[0].url;
