@@ -30,8 +30,15 @@ const gpt3 = async (message) => {
       console.log(response);
       image_url = response.data.data[0].url;
     } catch (error) {
-      console.log(error);
+      console.log('error: ', error);
+      return 'API Error';
     }
+
+    if (!response) {
+      return 'API Error';
+    }
+
+    console.log('response: ', response);
 
     if (response.status !== 200) {
       console.log(response.statusText, response.data);
@@ -63,10 +70,15 @@ const gpt3 = async (message) => {
       stop: [" Human:", " AI:"],
     });
   } catch (error) {
-    console.log(error);
+    console.log('error:', error);
+    return 'API Error';
   }
 
-  console.log(response);
+  if (!response) {
+    return 'API Error';
+  }
+  
+  console.log('response: ', response);
 
   if (response.status !== 200) {
     console.log(response.statusText, response.data);
