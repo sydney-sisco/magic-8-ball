@@ -21,47 +21,7 @@ const gpt3 = async (message) => {
 
 
   if (options.includes('i')) {
-
-    if (userPrompt.length > 256) {
-      message.reply(`Prompt must be less than 256 characters. Yours was ${userPrompt.length} characters.`);
-      return;
-    }
-
-    let response;
-    let image_url;
-    try {
-      response = await openai.createImage({
-        prompt: userPrompt,
-        n: 1,
-        size: "512x512",
-        user: member,
-      });
-      console.log(response);
-      image_url = response.data.data[0].url;
-    } catch (error) {
-      console.log('error: ', error);
-      return 'API Error';
-    }
-
-    if (!response) {
-      return 'API Error';
-    }
-
-    console.log('response: ', response);
-
-    if (response.status !== 200) {
-      console.log(response.statusText, response.data);
-      return 'API Error';
-    }
-
-    const imageEmbed = new EmbedBuilder()
-      .setTitle(`DALL·E Image: ${userPrompt}`)
-      .setImage(image_url)
-      .setColor('#0099ff')
-      .setTimestamp();
-
-    message.reply({ embeds: [imageEmbed] });
-    return;
+    return await createImage(userPrompt, member);
   }
 
   manageContext(userPrompt);
@@ -79,26 +39,74 @@ const gpt3 = async (message) => {
       stop: [" Human:", " AI:"],
       user: member,
     });
+
+    if (!response) {
+      return 'API Error';
+    }
+
+    console.log('response: ', response);
+
+    if (response.status !== 200) {
+      console.log(response.statusText, response.data);
+      return 'API Error';
+    }
+
+    const gptMessage = response.data.choices[0].text.trim();
+    console.log('gptMessage:', gptMessage);
+    context.push(`${aiIdentifier}${gptMessage}`);
+    return `${gptMessage}`;
   } catch (error) {
-    console.log('error:', error);
-    return 'API Error';
+    if (error.response) {
+      console.log('error status: ', error.response.status);
+      console.log('error data: ', error.response.data);
+      return `API Error: ${error.response.status}. ${error.response.data}`;
+    } else {
+      console.log('error message: ', error.message);
+      return `API Error: ${error.message}`;
+    }
   }
 
-  if (!response) {
-    return 'API Error';
-  }
-  
-  console.log('response: ', response);
+}
 
-  if (response.status !== 200) {
-    console.log(response.statusText, response.data);
-    return 'API Error';
+const createImage = async (userPrompt, member) => {
+
+  if (userPrompt.length > 256) {
+    return `Prompt must be less than 256 characters. Yours was ${userPrompt.length} characters.`;
   }
 
-  const gptMessage = response.data.choices[0].text.trim();
-  console.log('gptMessage:', gptMessage);
-  context.push(`${aiIdentifier}${gptMessage}`);
-  return `${gptMessage}`;
+  try {
+    const response = await openai.createImage({
+      prompt: userPrompt,
+      n: 1,
+      size: "512x512",
+      user: member,
+    });
+    console.log('response: ', response);
+    const image_url = response.data.data[0].url;
+
+    if (response.status !== 200) {
+      console.log(response.statusText, response.data);
+      return 'API Error';
+    }
+
+    const imageEmbed = new EmbedBuilder()
+      .setTitle(`DALL·E Image: ${userPrompt}`)
+      .setImage(image_url)
+      .setColor('#0099ff')
+      .setTimestamp();
+
+    return { embeds: [imageEmbed] };
+
+  } catch (error) {
+    if (error.response) {
+      console.log('error status: ', error.response.status);
+      console.log('error data: ', error.response.data);
+      return `API Error: ${error.response.status}. ${error.response.data}`;
+    } else {
+      console.log('error message: ', error.message);
+      return `API Error: ${error.message}`;
+    }
+  }
 }
 
 const manageContext = userPrompt => {
@@ -108,8 +116,6 @@ const manageContext = userPrompt => {
   
   context.push(`${humanIdentifier}${userPrompt}`);
 }
-
-
 
 module.exports = {
   GPT3_PREFIX,
