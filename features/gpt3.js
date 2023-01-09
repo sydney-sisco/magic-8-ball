@@ -19,6 +19,12 @@ const gpt3 = async (message) => {
   const [userPrompt, options] = getOptions(userPromptWithOptions);
 
   if (options.includes('i')) {
+
+    if (userPrompt.length > 256) {
+      message.reply('Prompt must be less than 256 characters');
+      return;
+    }
+
     let response;
     let image_url;
     try {
