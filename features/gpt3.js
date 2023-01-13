@@ -61,7 +61,7 @@ const gpt3 = async (message) => {
     if (error.response) {
       console.log('error status: ', error.response.status);
       console.log('error data: ', error.response.data);
-      return `API Error: ${error.response.status}. ${error.response.data}`;
+      return `API Error: ${error.response.status}: ${error.response.data.error.message}`;
     } else {
       console.log('error message: ', error.message);
       return `API Error: ${error.message}`;
@@ -103,7 +103,7 @@ const createImage = async (userPrompt, member) => {
     if (error.response) {
       console.log('error status: ', error.response.status);
       console.log('error data: ', error.response.data);
-      return `API Error: ${error.response.status}. ${error.response.data}`;
+      return `API Error: ${error.response.status}: ${error.response.data.error.message}`;
     } else {
       console.log('error message: ', error.message);
       return `API Error: ${error.message}`;
