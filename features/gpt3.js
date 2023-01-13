@@ -1,3 +1,5 @@
+const CONTEXT_LENGTH = process.env.OPENAI_CONTEXT_LENGTH || 1000;
+
 const { EmbedBuilder } = require('discord.js');
 const { Configuration, OpenAIApi } = require("openai");
 const configuration = new Configuration({
@@ -110,11 +112,21 @@ const createImage = async (userPrompt, member) => {
 }
 
 const manageContext = userPrompt => {
-  if (context.length > 10) {
-    context.shift();
-  }
-  
   context.push(`${humanIdentifier}${userPrompt}`);
+  manageContextLength(userPrompt);
+}
+
+const manageContextLength = userPrompt => {
+  // check total length of context
+  const totalLength = context.reduce((acc, cur) => acc + cur.length, 0);
+
+  if (totalLength > CONTEXT_LENGTH) {
+    // remove oldest context
+    context.shift();
+    
+    // recursively check again
+    return manageContextLength(userPrompt);
+  }
 }
 
 module.exports = {
