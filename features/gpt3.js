@@ -1,4 +1,5 @@
 const CONTEXT_LENGTH = process.env.OPENAI_CONTEXT_LENGTH || 1000;
+const TEXT_MODEL = process.env.OPENAI_TEXT_MODEL || 'text-ada-001';
 
 const { EmbedBuilder } = require('discord.js');
 const { Configuration, OpenAIApi } = require("openai");
@@ -31,7 +32,7 @@ const gpt3 = async (message) => {
   let response;
   try {
     response = await openai.createCompletion({
-      model: "text-davinci-003",
+      model: TEXT_MODEL,
       prompt: `${cannedPrompt}${context}${aiIdentifier}`,
       temperature: 0.9,
       max_tokens: 150,
