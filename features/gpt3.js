@@ -1,3 +1,4 @@
+var fs = require('fs');
 const CONTEXT_LENGTH = process.env.OPENAI_CONTEXT_LENGTH || 1000;
 const TEXT_MODEL = process.env.OPENAI_TEXT_MODEL || 'text-ada-001';
 
@@ -7,6 +8,8 @@ const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
 });
 const openai = new OpenAIApi(configuration);
+
+const download = require('image-downloader');
 
 const { getOptions } = require('../util/shared-helpers.js');
 
@@ -25,6 +28,10 @@ const gpt3 = async (message) => {
 
   if (options.includes('i')) {
     return await createImage(userPrompt, member);
+  }
+
+  if (options.includes('v')) {
+    return await createVariation(userPrompt, member);
   }
 
   manageContext(userPrompt);
@@ -92,6 +99,9 @@ const createImage = async (userPrompt, member) => {
       return 'API Error';
     }
 
+    // download image
+    downloadImage(image_url, userPrompt);
+
     const imageEmbed = new EmbedBuilder()
       .setTitle(`DALL·E Image: ${userPrompt}`)
       .setImage(image_url)
@@ -112,6 +122,43 @@ const createImage = async (userPrompt, member) => {
   }
 }
 
+const createVariation = async (filename, member) => {
+
+  console.log('directory:', process.cwd());
+
+  try {
+    const response = await openai.createImageVariation(
+      fs.createReadStream(`${process.cwd() }/images/${filename}.png`),
+      1,
+      "1024x1024",
+      "url",
+      member,
+    );
+  
+    image_url = response.data.data[0].url;
+  
+    // download image
+    downloadImage(image_url, `${filename}-variation`);
+  
+    const imageEmbed = new EmbedBuilder()
+      .setTitle(`DALL·E Image: ${filename}-variation`)
+      .setImage(image_url)
+      .setColor('#0099ff')
+      .setTimestamp();
+  
+    return { embeds: [imageEmbed] };
+  } catch (error) {
+    if (error.response) {
+      console.log('error status: ', error.response.status);
+      console.log('error data: ', error.response.data);
+      return `API Error: ${error.response.status}: ${error.response.data.error.message}`;
+    } else {
+      console.log('error message: ', error.message);
+      return `API Error: ${error.message}`;
+    }
+  }
+};
+
 const manageContext = userPrompt => {
   context.push(`${humanIdentifier}${userPrompt}`);
   manageContextLength(userPrompt);
@@ -128,6 +175,23 @@ const manageContextLength = userPrompt => {
     // recursively check again
     return manageContextLength(userPrompt);
   }
+}
+
+// function to download image from url
+const downloadImage = async (url, prompt) => {
+  const options = {
+    url,
+    dest: `${process.cwd() }/images/${prompt}.png`,
+  };
+
+  try {
+    const { filename } = await download.image(options);
+    console.log('Saved to', filename);
+    return filename;
+  } catch (e) {
+    console.error(e);
+  }
+
 }
 
 module.exports = {
