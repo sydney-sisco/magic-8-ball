@@ -12,6 +12,7 @@ const openai = new OpenAIApi(configuration);
 const download = require('image-downloader');
 
 const { getOptions } = require('../util/shared-helpers.js');
+const { uploadImage } = require('../util/upload.js');
 
 const GPT3_PREFIX = '!!';
 
@@ -100,11 +101,12 @@ const createImage = async (userPrompt, member) => {
     }
 
     // download image
-    downloadImage(image_url, userPrompt);
+    const hostedImageUrl = await downloadImage(image_url, userPrompt, member);
 
     const imageEmbed = new EmbedBuilder()
       .setTitle(`DALL·E Image: ${userPrompt}`)
-      .setImage(image_url)
+      // .setImage(image_url)
+      .setImage(hostedImageUrl)
       .setColor('#0099ff')
       .setTimestamp();
 
@@ -138,7 +140,7 @@ const createVariation = async (filename, member) => {
     image_url = response.data.data[0].url;
   
     // download image
-    downloadImage(image_url, `${filename}-variation`);
+    downloadImage(image_url, `${filename}-variation`, member);
   
     const imageEmbed = new EmbedBuilder()
       .setTitle(`DALL·E Image: ${filename}-variation`)
@@ -178,16 +180,19 @@ const manageContextLength = userPrompt => {
 }
 
 // function to download image from url
-const downloadImage = async (url, prompt) => {
+const downloadImage = async (url, prompt, member) => {
   const options = {
     url,
     dest: `${process.cwd() }/images/${prompt}.png`,
   };
 
   try {
-    const { filename } = await download.image(options);
-    console.log('Saved to', filename);
-    return filename;
+    const { filename: imagePath } = await download.image(options);
+    console.log('Saved to', imagePath);
+
+    const imageURL = await uploadImage(imagePath, prompt, member);
+
+    return imageURL;
   } catch (e) {
     console.error(e);
   }
