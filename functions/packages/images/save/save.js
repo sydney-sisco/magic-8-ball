@@ -2,9 +2,11 @@
 // import { ListBucketsCommand } from "@aws-sdk/client-s3";
 // import { s3Client } from "./s3Client.js";
 
-function main(args) {
+async function main(args) {
   let name = args.name || 'stranger'
   let greeting = 'Hello ' + name + '!'
   console.log(greeting)
   return { "body": greeting }
 }
+
+module.exports.main = main
