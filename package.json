@@ -13,10 +13,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aws-sdk": "^2.948.0",
+    "aws-sdk": "^2.1295.0",
     "didyoumean": "^1.2.2",
     "discord.js": "^14.6.0",
     "dotenv": "^8.2.0",
+    "image-downloader": "^4.3.0",
     "openai": "^3.1.0",
     "openweather-apis": "^4.4.1",
     "pokemon.js": "^1.1.8",

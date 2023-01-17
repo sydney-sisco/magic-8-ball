@@ -1,3 +1,7 @@
+var fs = require('fs');
+const CONTEXT_LENGTH = process.env.OPENAI_CONTEXT_LENGTH || 1000;
+const TEXT_MODEL = process.env.OPENAI_TEXT_MODEL || 'text-ada-001';
+
 const { EmbedBuilder } = require('discord.js');
 const { Configuration, OpenAIApi } = require("openai");
 const configuration = new Configuration({
@@ -5,7 +9,10 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
+const download = require('image-downloader');
+
 const { getOptions } = require('../util/shared-helpers.js');
+const { uploadImage } = require('../util/upload.js');
 
 const GPT3_PREFIX = '!!';
 
@@ -24,12 +31,16 @@ const gpt3 = async (message) => {
     return await createImage(userPrompt, member);
   }
 
+  if (options.includes('v')) {
+    return await createVariation(userPrompt, member);
+  }
+
   manageContext(userPrompt);
 
   let response;
   try {
     response = await openai.createCompletion({
-      model: "text-davinci-003",
+      model: TEXT_MODEL,
       prompt: `${cannedPrompt}${context}${aiIdentifier}`,
       temperature: 0.9,
       max_tokens: 150,
@@ -59,7 +70,7 @@ const gpt3 = async (message) => {
     if (error.response) {
       console.log('error status: ', error.response.status);
       console.log('error data: ', error.response.data);
-      return `API Error: ${error.response.status}. ${error.response.data}`;
+      return `API Error: ${error.response.status}: ${error.response.data.error.message}`;
     } else {
       console.log('error message: ', error.message);
       return `API Error: ${error.message}`;
@@ -89,9 +100,13 @@ const createImage = async (userPrompt, member) => {
       return 'API Error';
     }
 
+    // download image
+    const hostedImageUrl = await downloadImage(image_url, userPrompt, member);
+
     const imageEmbed = new EmbedBuilder()
       .setTitle(`DALL·E Image: ${userPrompt}`)
-      .setImage(image_url)
+      // .setImage(image_url)
+      .setImage(hostedImageUrl)
       .setColor('#0099ff')
       .setTimestamp();
 
@@ -101,7 +116,7 @@ const createImage = async (userPrompt, member) => {
     if (error.response) {
       console.log('error status: ', error.response.status);
       console.log('error data: ', error.response.data);
-      return `API Error: ${error.response.status}. ${error.response.data}`;
+      return `API Error: ${error.response.status}: ${error.response.data.error.message}`;
     } else {
       console.log('error message: ', error.message);
       return `API Error: ${error.message}`;
@@ -109,12 +124,79 @@ const createImage = async (userPrompt, member) => {
   }
 }
 
-const manageContext = userPrompt => {
-  if (context.length > 10) {
-    context.shift();
-  }
+const createVariation = async (filename, member) => {
+
+  console.log('directory:', process.cwd());
+
+  try {
+    const response = await openai.createImageVariation(
+      fs.createReadStream(`${process.cwd() }/images/${filename}.png`),
+      1,
+      "1024x1024",
+      "url",
+      member,
+    );
   
+    image_url = response.data.data[0].url;
+  
+    // download image
+    downloadImage(image_url, `${filename}-variation`, member);
+  
+    const imageEmbed = new EmbedBuilder()
+      .setTitle(`DALL·E Image: ${filename}-variation`)
+      .setImage(image_url)
+      .setColor('#0099ff')
+      .setTimestamp();
+  
+    return { embeds: [imageEmbed] };
+  } catch (error) {
+    if (error.response) {
+      console.log('error status: ', error.response.status);
+      console.log('error data: ', error.response.data);
+      return `API Error: ${error.response.status}: ${error.response.data.error.message}`;
+    } else {
+      console.log('error message: ', error.message);
+      return `API Error: ${error.message}`;
+    }
+  }
+};
+
+const manageContext = userPrompt => {
   context.push(`${humanIdentifier}${userPrompt}`);
+  manageContextLength(userPrompt);
+}
+
+const manageContextLength = userPrompt => {
+  // check total length of context
+  const totalLength = context.reduce((acc, cur) => acc + cur.length, 0);
+
+  if (totalLength > CONTEXT_LENGTH) {
+    // remove oldest context
+    context.shift();
+    
+    // recursively check again
+    return manageContextLength(userPrompt);
+  }
+}
+
+// function to download image from url
+const downloadImage = async (url, prompt, member) => {
+  const options = {
+    url,
+    dest: `${process.cwd() }/images/${prompt}.png`,
+  };
+
+  try {
+    const { filename: imagePath } = await download.image(options);
+    console.log('Saved to', imagePath);
+
+    const imageURL = await uploadImage(imagePath, prompt, member);
+
+    return imageURL;
+  } catch (e) {
+    console.error(e);
+  }
+
 }
 
 module.exports = {
