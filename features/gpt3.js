@@ -209,7 +209,7 @@ const downloadImage = async (url, prompt, member, message) => {
 
     return imageURL;
   } catch (e) {
-    message.react('❌');
+    // message.react('❌');
     console.error(e);
   }
 
