@@ -26,9 +26,11 @@ const gpt3 = async (message) => {
   const userPromptWithOptions = message.content.slice(GPT3_PREFIX.length).trim();
   const [userPrompt, options] = getOptions(userPromptWithOptions);
 
+  message.react('1️⃣');
+
 
   if (options.includes('i')) {
-    return await createImage(userPrompt, member);
+    return await createImage(userPrompt, member, message);
   }
 
   if (options.includes('v')) {
@@ -50,6 +52,8 @@ const gpt3 = async (message) => {
       stop: [" Human:", " AI:"],
       user: member,
     });
+
+    message.react('2️⃣');
 
     if (!response) {
       return 'API Error';
@@ -79,7 +83,7 @@ const gpt3 = async (message) => {
 
 }
 
-const createImage = async (userPrompt, member) => {
+const createImage = async (userPrompt, member, message) => {
 
   if (userPrompt.length > 256) {
     return `Prompt must be less than 256 characters. Yours was ${userPrompt.length} characters.`;
@@ -95,13 +99,16 @@ const createImage = async (userPrompt, member) => {
     console.log('response: ', response);
     const image_url = response.data.data[0].url;
 
+    message.react('2️⃣');
+
     if (response.status !== 200) {
       console.log(response.statusText, response.data);
+      message.react('❌');
       return 'API Error';
     }
 
     // download image
-    const hostedImageUrl = await downloadImage(image_url, userPrompt, member);
+    const hostedImageUrl = await downloadImage(image_url, userPrompt, member, message);
 
     const imageEmbed = new EmbedBuilder()
       .setTitle(`DALL·E Image: ${userPrompt}`)
@@ -110,21 +117,25 @@ const createImage = async (userPrompt, member) => {
       .setColor('#0099ff')
       .setTimestamp();
 
+    message.react('✅');
+
     return { embeds: [imageEmbed] };
 
   } catch (error) {
     if (error.response) {
       console.log('error status: ', error.response.status);
       console.log('error data: ', error.response.data);
+      message.react('❌');
       return `API Error: ${error.response.status}: ${error.response.data.error.message}`;
     } else {
       console.log('error message: ', error.message);
+      message.react('❌');
       return `API Error: ${error.message}`;
     }
   }
 }
 
-const createVariation = async (filename, member) => {
+const createVariation = async (filename, member, message) => {
 
   console.log('directory:', process.cwd());
 
@@ -140,7 +151,7 @@ const createVariation = async (filename, member) => {
     image_url = response.data.data[0].url;
   
     // download image
-    downloadImage(image_url, `${filename}-variation`, member);
+    downloadImage(image_url, `${filename}-variation`, member, message);
   
     const imageEmbed = new EmbedBuilder()
       .setTitle(`DALL·E Image: ${filename}-variation`)
@@ -180,7 +191,7 @@ const manageContextLength = userPrompt => {
 }
 
 // function to download image from url
-const downloadImage = async (url, prompt, member) => {
+const downloadImage = async (url, prompt, member, message) => {
   const options = {
     url,
     dest: `${process.cwd() }/images/${prompt}.png`,
@@ -190,10 +201,15 @@ const downloadImage = async (url, prompt, member) => {
     const { filename: imagePath } = await download.image(options);
     console.log('Saved to', imagePath);
 
+    message.react('3️⃣');
+
     const imageURL = await uploadImage(imagePath, prompt, member);
+
+    message.react('4️⃣');
 
     return imageURL;
   } catch (e) {
+    message.react('❌');
     console.error(e);
   }
 
