@@ -34,7 +34,7 @@ const gpt3 = async (message) => {
   }
 
   if (options.includes('v')) {
-    return await createVariation(userPrompt, member);
+    return await createVariation(userPrompt, member, message);
   }
 
   manageContext(userPrompt);
@@ -209,7 +209,7 @@ const downloadImage = async (url, prompt, member, message) => {
 
     return imageURL;
   } catch (e) {
-    // message.react('❌');
+    message.react('❌');
     console.error(e);
   }
 
