@@ -96,7 +96,12 @@ client.on('messageCreate', async message => {
       return;
     }
 
-    message.reply(result);
+    const response = await message.reply(result);
+    // message.reply(result);
+    response.react('❤️');
+    response.react('👎');
+
+    
   }
 
   if (message.content.startsWith(POKEMON_PREFIX)) {
