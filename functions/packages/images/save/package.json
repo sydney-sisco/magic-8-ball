@@ -1,9 +1,7 @@
 {
-  "name": "save",
-  "version": "1.0.0",
-  "description": "",
-  "main": "save.js",
+  "main": "index.js",
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.245.0"
+    "aws-sdk": "^2.1125.0",
+    "axios": "^1.2.3"
   }
 }
