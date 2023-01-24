@@ -17,3 +17,7 @@ This bot can do more than just see the future! The current list of features incl
 
 ![can snakes jump?](https://github.com/sydney-sisco/magic-8-ball/blob/main/docs/snek.png?raw=true)
 ![features](https://github.com/sydney-sisco/magic-8-ball/blob/main/docs/features.png?raw=true)
+
+### Development
+
+`npm run debug`

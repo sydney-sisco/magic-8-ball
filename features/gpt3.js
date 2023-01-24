@@ -1,4 +1,5 @@
 var fs = require('fs');
+var axios = require('axios');
 const CONTEXT_LENGTH = process.env.OPENAI_CONTEXT_LENGTH || 1000;
 const TEXT_MODEL = process.env.OPENAI_TEXT_MODEL || 'text-ada-001';
 
@@ -12,7 +13,6 @@ const openai = new OpenAIApi(configuration);
 const download = require('image-downloader');
 
 const { getOptions } = require('../util/shared-helpers.js');
-const { uploadImage } = require('../util/upload.js');
 
 const GPT3_PREFIX = '!!';
 
@@ -107,12 +107,13 @@ const createImage = async (userPrompt, member, message) => {
       return 'API Error';
     }
 
-    // download image
-    const hostedImageUrl = await downloadImage(image_url, userPrompt, member, message);
+    // invoke function to save image to cloud storage
+    const hostedImageUrl = await invokeSaveFunction(image_url, userPrompt, member);
+
+    message.react('3️⃣');
 
     const imageEmbed = new EmbedBuilder()
       .setTitle(`DALL·E Image: ${userPrompt}`)
-      // .setImage(image_url)
       .setImage(hostedImageUrl)
       .setColor('#0099ff')
       .setTimestamp();
@@ -149,13 +150,15 @@ const createVariation = async (filename, member, message) => {
     );
   
     image_url = response.data.data[0].url;
-  
-    // download image
-    downloadImage(image_url, `${filename}-variation`, member, message);
+
+    // invoke function to save image to cloud storage
+    const hostedImageUrl = await invokeSaveFunction(image_url, `${filename}-variation`, member);
+
+    message.react('3️⃣');
   
     const imageEmbed = new EmbedBuilder()
       .setTitle(`DALL·E Image: ${filename}-variation`)
-      .setImage(image_url)
+      .setImage(hostedImageUrl)
       .setColor('#0099ff')
       .setTimestamp();
   
@@ -190,29 +193,21 @@ const manageContextLength = userPrompt => {
   }
 }
 
-// function to download image from url
-const downloadImage = async (url, prompt, member, message) => {
+const invokeSaveFunction = async (url, prompt, member) => {
   const options = {
     url,
-    dest: `${process.cwd() }/images/${prompt}.png`,
+    prompt,
+    member,
   };
 
   try {
-    const { filename: imagePath } = await download.image(options);
-    console.log('Saved to', imagePath);
-
-    message.react('3️⃣');
-
-    const imageURL = await uploadImage(imagePath, prompt, member);
-
-    message.react('4️⃣');
-
-    return imageURL;
+    const response = await axios.post(`${process.env.DO_FUNCTION_URL}`, options);
+    console.log('response: ', response);
+    return response.data.url;
   } catch (e) {
-    message.react('❌');
     console.error(e);
+    return `Error saving image: ${e.message}`;
   }
-
 }
 
 module.exports = {
