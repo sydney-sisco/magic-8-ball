@@ -12,9 +12,8 @@ const s3 = new AWS.S3({
 })
 
 async function main(args) {
+  // console.log('args', args);
   const { url, prompt, member } = args;
-
-  console.log('args', args);
 
   if (!url || !prompt || !member) {
     console.log('missing url, prompt or member');
@@ -40,6 +39,7 @@ async function main(args) {
     'x-amz-acl': 'public-read',
     'member': member,
     'prompt': prompt,
+    'created': new Date().toISOString(),
   }
 
   const uploadedImage = await s3.upload({
@@ -52,7 +52,6 @@ async function main(args) {
   }).promise()
 
   console.log('DO res: ', uploadedImage);
-  console.log('DO url: ', uploadedImage.Location);
 
   return {
     statusCode: 200,
@@ -64,37 +63,5 @@ async function main(args) {
     }
   }
 }
-
-const uploadImage = async (imagePath, prompt, member) => {
-  const blob = null; // = fs.readFileSync(imagePath)
-
-  // const Key = `${prompt.replaceAll(' ', '_')}.png` // not supported in node 14 apparently
-
-  var find = ' ';
-  var re = new RegExp(find, 'g');
-  const Key = prompt.replace(re, '');
-
-
-
-  const metadata = {
-    'x-amz-acl': 'public-read',
-    'member': member,
-    'prompt': prompt,
-  }
-
-  const uploadedImage = await s3.upload({
-    Bucket: process.env.DO_SPACES_NAME,
-    Key,
-    Body: blob,
-    ACL: 'public-read',
-    ContentType: 'image/png',
-    Metadata: metadata,
-  }).promise()
-
-  console.log('DO res: ', uploadedImage);
-  console.log('DO url: ', uploadedImage.Location);
-
-  return uploadedImage.Location
-};
 
 exports.main = main;
