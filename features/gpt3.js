@@ -26,9 +26,6 @@ const gpt3 = async (message) => {
   const userPromptWithOptions = message.content.slice(GPT3_PREFIX.length).trim();
   const [userPrompt, options] = getOptions(userPromptWithOptions);
 
-  message.react('1️⃣');
-
-
   if (options.includes('i')) {
     return await createImage(userPrompt, member, message);
   }
@@ -52,8 +49,6 @@ const gpt3 = async (message) => {
       stop: [" Human:", " AI:"],
       user: member,
     });
-
-    message.react('2️⃣');
 
     if (!response) {
       return 'API Error';
@@ -84,6 +79,8 @@ const gpt3 = async (message) => {
 }
 
 const createImage = async (userPrompt, member, message) => {
+
+  message.react('1️⃣');
 
   if (userPrompt.length > 256) {
     return `Prompt must be less than 256 characters. Yours was ${userPrompt.length} characters.`;
