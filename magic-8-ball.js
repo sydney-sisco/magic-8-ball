@@ -100,8 +100,6 @@ client.on('messageCreate', async message => {
     // message.reply(result);
     response.react('❤️');
     response.react('👎');
-
-    
   }
 
   if (message.content.startsWith(POKEMON_PREFIX)) {
