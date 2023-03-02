@@ -16,11 +16,6 @@ const { getOptions } = require('../util/shared-helpers.js');
 
 const GPT3_PREFIX = '!!';
 
-// const humanIdentifier = `\nHuman: `;
-// const aiIdentifier = '\nAI: ';
-// const context = [];
-// const cannedPrompt = `The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.\n${humanIdentifier}Hello, who are you?${aiIdentifier}I am an AI created by OpenAI. How can I help you today?`;
-
 const messages = [
   { role: 'system', content: 'You are a helpful assistant.' },
   { role: 'user', content: 'Hello, who are you?' },
@@ -36,9 +31,9 @@ const gpt3 = async (message) => {
     return await createImage(userPrompt, member, message);
   }
 
-  if (options.includes('v')) {
-    return await createVariation(userPrompt, member, message);
-  }
+  // if (options.includes('v')) {
+  //   return await createVariation(userPrompt, member, message);
+  // }
 
   manageContext(messages, userPrompt);
 
@@ -47,14 +42,12 @@ const gpt3 = async (message) => {
     response = await openai.createChatCompletion({
       model: TEXT_MODEL,
       messages,
-      // prompt: `${cannedPrompt}${context}${aiIdentifier}`,
       // temperature: 0.9,
       // max_tokens: 150,
       // top_p: 1,
       // frequency_penalty: 0,
       // presence_penalty: 0.6,
-      // stop: [" Human:", " AI:"],
-      // user: member,
+      user: member,
     });
 
     if (!response) {
@@ -70,7 +63,6 @@ const gpt3 = async (message) => {
 
     const gptMessage = response.data.choices[0].message.content.trim();
     console.log('gptMessage:', gptMessage);
-    // context.push(`${aiIdentifier}${gptMessage}`);
     messages.push({ role: 'assistant', content: gptMessage });
     return `${gptMessage}`;
   } catch (error) {
