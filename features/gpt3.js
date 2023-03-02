@@ -19,7 +19,13 @@ const GPT3_PREFIX = '!!';
 const humanIdentifier = `\nHuman: `;
 const aiIdentifier = '\nAI: ';
 const context = [];
-const cannedPrompt = `The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.\n${humanIdentifier}Hello, who are you?${aiIdentifier}I am an AI created by OpenAI. How can I help you today?`;
+// const cannedPrompt = `The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.\n${humanIdentifier}Hello, who are you?${aiIdentifier}I am an AI created by OpenAI. How can I help you today?`;
+
+const messages = [
+  { role: 'system', content: 'You are a helpful assistant.' },
+  { role: 'user', content: 'Hello, who are you?' },
+  { role: 'assistant', content: 'I am your cyberspace assistant. How can I help you today?' },
+]
 
 const gpt3 = async (message) => {
   const member = message.member.id;
@@ -34,20 +40,21 @@ const gpt3 = async (message) => {
     return await createVariation(userPrompt, member, message);
   }
 
-  manageContext(userPrompt);
+  manageContext(messages, userPrompt);
 
   let response;
   try {
-    response = await openai.createCompletion({
+    response = await openai.createChatCompletion({
       model: TEXT_MODEL,
-      prompt: `${cannedPrompt}${context}${aiIdentifier}`,
-      temperature: 0.9,
-      max_tokens: 150,
-      top_p: 1,
-      frequency_penalty: 0,
-      presence_penalty: 0.6,
-      stop: [" Human:", " AI:"],
-      user: member,
+      messages,
+      // prompt: `${cannedPrompt}${context}${aiIdentifier}`,
+      // temperature: 0.9,
+      // max_tokens: 150,
+      // top_p: 1,
+      // frequency_penalty: 0,
+      // presence_penalty: 0.6,
+      // stop: [" Human:", " AI:"],
+      // user: member,
     });
 
     if (!response) {
@@ -61,9 +68,10 @@ const gpt3 = async (message) => {
       return 'API Error';
     }
 
-    const gptMessage = response.data.choices[0].text.trim();
+    const gptMessage = response.data.choices[0].message.content.trim();
     console.log('gptMessage:', gptMessage);
-    context.push(`${aiIdentifier}${gptMessage}`);
+    // context.push(`${aiIdentifier}${gptMessage}`);
+    messages.push({ role: 'assistant', content: gptMessage });
     return `${gptMessage}`;
   } catch (error) {
     if (error.response) {
@@ -172,21 +180,21 @@ const createVariation = async (filename, member, message) => {
   }
 };
 
-const manageContext = userPrompt => {
-  context.push(`${humanIdentifier}${userPrompt}`);
-  manageContextLength(userPrompt);
+const manageContext = (messages, userPrompt) => {
+  messages.push({ role: 'user', content: userPrompt });
+  manageContextLength(messages, userPrompt);
 }
 
-const manageContextLength = userPrompt => {
+const manageContextLength = (messages, userPrompt) => {
   // check total length of context
-  const totalLength = context.reduce((acc, cur) => acc + cur.length, 0);
+  const totalLength = messages.reduce((acc, cur) => acc + cur.content.length, 0);
 
   if (totalLength > CONTEXT_LENGTH) {
     // remove oldest context
     context.shift();
     
     // recursively check again
-    return manageContextLength(userPrompt);
+    return manageContextLength(messages, userPrompt);
   }
 }
 
