@@ -16,9 +16,9 @@ const { getOptions } = require('../util/shared-helpers.js');
 
 const GPT3_PREFIX = '!!';
 
-const humanIdentifier = `\nHuman: `;
-const aiIdentifier = '\nAI: ';
-const context = [];
+// const humanIdentifier = `\nHuman: `;
+// const aiIdentifier = '\nAI: ';
+// const context = [];
 // const cannedPrompt = `The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.\n${humanIdentifier}Hello, who are you?${aiIdentifier}I am an AI created by OpenAI. How can I help you today?`;
 
 const messages = [
@@ -191,7 +191,7 @@ const manageContextLength = (messages, userPrompt) => {
 
   if (totalLength > CONTEXT_LENGTH) {
     // remove oldest context
-    context.shift();
+    messages.shift();
     
     // recursively check again
     return manageContextLength(messages, userPrompt);
