@@ -64,7 +64,14 @@ const gpt3 = async (message) => {
     const gptMessage = response.data.choices[0].message.content.trim();
     console.log('gptMessage:', gptMessage);
     messages.push({ role: 'assistant', content: gptMessage });
+
+    // if gptMessage is longer than 2000 characters, split it into multiple messages, each less than 2000 characters
+    if (gptMessage.length > 2000) {
+      const splitMessages = gptMessage.match(/(.|[\r\n]){1,2000}/g);
+      return splitMessages;
+    }
     return `${gptMessage}`;
+
   } catch (error) {
     if (error.response) {
       console.log('error status: ', error.response.status);

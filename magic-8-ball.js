@@ -96,6 +96,16 @@ client.on('messageCreate', async message => {
       return;
     }
 
+    // if result is an array, send each item as a separate message
+    if (Array.isArray(result)) {
+      result.forEach(async (item) => {
+        const response = await message.reply(item);
+        response.react('❤️');
+        response.react('👎');
+      });
+      return;
+    }
+
     const response = await message.reply(result);
     // message.reply(result);
     response.react('❤️');
