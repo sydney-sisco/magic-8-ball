@@ -17,7 +17,7 @@ const { getOptions } = require('../util/shared-helpers.js');
 const GPT3_PREFIX = '!!';
 
 const messages = [
-  { role: 'system', content: 'You are a helpful assistant.' },
+  { role: 'system', content: 'You are GPT-4, a large language model trained by OpenAI. Answer as concisely as possible.' },
   { role: 'user', content: 'Hello, who are you?' },
   { role: 'assistant', content: 'I am your cyberspace assistant. How can I help you today?' },
 ]
@@ -26,6 +26,8 @@ const gpt3 = async (message) => {
   const member = message.member.id;
   const userPromptWithOptions = message.content.slice(GPT3_PREFIX.length).trim();
   const [userPrompt, options] = getOptions(userPromptWithOptions);
+
+  message.channel.sendTyping()
 
   if (options.includes('i')) {
     return await createImage(userPrompt, member, message);
