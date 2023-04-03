@@ -90,6 +90,9 @@ client.on('messageCreate', async message => {
 
   if (message.content.startsWith(GPT3_PREFIX)) {
 
+    message.channel.sendTyping()
+    const intervalId = setInterval(() => { message.channel.sendTyping() }, 5000);
+
     const result = await gpt3(message);
 
     if (!result) {
@@ -105,6 +108,8 @@ client.on('messageCreate', async message => {
       });
       return;
     }
+    
+    clearInterval(intervalId);
 
     const response = await message.reply(result);
     // message.reply(result);

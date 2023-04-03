@@ -27,7 +27,6 @@ const gpt3 = async (message) => {
   const userPromptWithOptions = message.content.slice(GPT3_PREFIX.length).trim();
   const [userPrompt, options] = getOptions(userPromptWithOptions);
 
-  message.channel.sendTyping()
 
   if (options.includes('i')) {
     return await createImage(userPrompt, member, message);
