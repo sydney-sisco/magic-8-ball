@@ -21,6 +21,7 @@
     "discord.js": "^14.6.0",
     "dotenv": "^8.2.0",
     "image-downloader": "^4.3.0",
+    "libsodium-wrappers": "^0.7.11",
     "openai": "^3.2.1",
     "openweather-apis": "^4.4.1",
     "pokemon.js": "^1.1.8",
@@ -30,6 +31,5 @@
   "devDependencies": {
     "jest": "^27.0.6",
     "nodemon": "^2.0.7"
-  },
-  "type": "module"
+  }
 }
