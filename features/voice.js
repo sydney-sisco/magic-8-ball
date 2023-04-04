@@ -14,8 +14,8 @@ const {
 } = require('@discordjs/voice');
 
 const client = new textToSpeech.TextToSpeechClient();
-async function quickStart() {
-  const text = 'hello, world!';
+async function generateAudio(text) {
+  // const text = 'hello, world!';
   // const text = 'こんにちは、世界！';
 //   const text = `. Intergalactic Taco Invasion: Mysterious aliens have infiltrated the United States under the guise of a popular fast-food chain, "Galactic Tacos." They've been secretly collecting human data through taco sales and causing an uncontrollable craving for tacos in millions of people. Brace yourselves for the impending "Tacopalypse!"
 // 2. Sudden Outbreak of Polka-Dotitis: A peculiar disease called "Polka-Dotitis" has taken over the country, causing people to develop brightly colored polka dots all over their bodies. No one knows how the outbreak started or how to cure it, but one thing's for sure – everyone's fashion sense has skyrocketed!
@@ -27,12 +27,12 @@ async function quickStart() {
   const request = {
     input: { text: text },
     voice: {
-      // languageCode: "en-US",
-      // name: "en-US-Studio-O",
-      // ssmlGender: "FEMALE"
-      languageCode: "ja-JP",
-      name: "ja-JP-Neural2-B",
+      languageCode: "en-US",
+      name: "en-US-Studio-O",
       ssmlGender: "FEMALE"
+      // languageCode: "ja-JP",
+      // name: "ja-JP-Neural2-B",
+      // ssmlGender: "FEMALE"
     },
     audioConfig: { audioEncoding: 'MP3' },
   };
@@ -41,15 +41,10 @@ async function quickStart() {
   
   // Write the binary audio content to a local file
   const writeFile = util.promisify(fs.writeFile);
-  await writeFile('output.mp3', response.audioContent, 'binary');
+  await writeFile(join(__dirname, 'output.mp3'), response.audioContent, 'binary');
   console.log('Audio content written to file: output.mp3');
 }
 // quickStart();
-function sleep(ms) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
 
 const { getOptions } = require('../util/shared-helpers.js');
 const VOICE_PREFIX = '!say';
@@ -109,23 +104,23 @@ const voice = async (message) => {
   //   adapterCreator: message.channel.guild.voiceAdapterCreator,
   // });
 
+  await generateAudio(userPrompt);
+
   const connection = await connectToChannel(message.member?.voice.channel);
 
   connection.on(VoiceConnectionStatus.Ready, async () => {
     console.log('The connection has entered the Ready state - ready to play audio!');
 
     // sleep 1 second using await
-    await sleep(1000);
+    // await sleep(1000);
     const player = createAudioPlayer();
-    // const resource = createAudioResource('./output.mp3');
-    // // resource = createAudioResource(join(__dirname, 'file.mp3'), { inlineVolume: true });
-    // // resource.volume.setVolume(0.5);
-    // // const resource = connection.play('./output.mp3');
-    // player.play(resource);
-    // const resource = createAudioResource('./output.mp3');
-    const resource = createAudioResource(
-      "https://storage.googleapis.com/photo-gallery-8072626/samples/goo.mp3"
-    )
+
+    // play a local file
+    resource = createAudioResource(join(__dirname, 'output.mp3'));
+
+    // play a remote file
+    // const resource = createAudioResource("https://storage.googleapis.com/photo-gallery-8072626/samples/goo.mp3")
+
     player.play(resource);
     connection.subscribe(player);
   });
