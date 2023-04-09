@@ -21,3 +21,6 @@ This bot can do more than just see the future! The current list of features incl
 ### Development
 
 `npm run debug`
+
+`gcloud config configurations activate magic-8-ball`
+`gcloud auth application-default login`

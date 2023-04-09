@@ -16,10 +16,36 @@ const { getOptions } = require('../util/shared-helpers.js');
 
 const GPT3_PREFIX = '!!';
 
+const { wolframGetShort } = require('../features/wolfram.js');
+
+const plugins = {
+  wolfram: {
+    name: 'wolfram',
+    description: 'Use wolfram alpha to get the best answers possible',
+    usage: 'wolfram',
+    examples: ['wolfram("current weather in New York")','wolfram("how many golf balls would fit inside the earth?")'],
+    function: async (query) => {
+      const response = await wolframGetShort({ content: `!7 ${query}`, author: { username: '', discriminator: ''} });
+      return response;
+    }
+  }
+};
+
+const systemMessage = `You are a helpful assistant written in NodeJS. Answer as concisely as possible. You have access to the following plugins: ${Object.keys(plugins).map(key => `${plugins[key].name}: ${plugins[key].description}`).join(', ')}. To use a plugin, enclose the plugin function and its query in double curly braces. For example, {{wolfram("current weather in New York")}}.`;
+
 const messages = [
-  { role: 'system', content: 'You are GPT-4, a large language model trained by OpenAI. Answer as concisely as possible.' },
+  { role: 'system', content: systemMessage },
+
   { role: 'user', content: 'Hello, who are you?' },
-  { role: 'assistant', content: 'I am your cyberspace assistant. How can I help you today?' },
+  { role: 'assistant', content: 'I am your AI-powered chatbot assistant. How can I help you today?' },
+  { role: 'user', content: 'I would like to know the weather in New York.' },
+  { role: 'assistant', content: '{{wolfram("current weather in New York")}}' },
+  { role: 'user', content: 'The weather in New York City, United States, currently includes no precipitation with clear skies, a wind speed of 4 meters per second and a temperature of 13 degrees Celsius'},
+  { role: 'assistant', content: 'The weather in New York City, United States, currently includes no precipitation with clear skies, a wind speed of 4 meters per second and a temperature of 13 degrees Celsius'},
+  { role: 'user', content: 'how many golf balls would fit inside the earth?'},
+  { role: 'assistant', content: '{{wolfram("how many golf balls would fit inside the earth?")}}'},
+  { role: 'user', content: '1.5 times 10 to the 25 to 1.7 times 10 to the 25'},
+  { role: 'assistant', content: 'The number of golf balls that would fit inside the Earth lies somewhere between 15 and 17 septillion.'},
 ]
 
 const gpt3 = async (message) => {
@@ -62,9 +88,33 @@ const gpt3 = async (message) => {
       return 'API Error';
     }
 
-    const gptMessage = response.data.choices[0].message.content.trim();
+    let gptMessage = response.data.choices[0].message.content.trim();
     console.log('gptMessage:', gptMessage);
     messages.push({ role: 'assistant', content: gptMessage });
+
+    // check for plugin usage
+    const regex = /\{\{(\w+)\(\"(.*?)\"\)\}\}/;
+    const match = regex.exec(gptMessage);
+
+    if (match !== null) {
+      const pluginName = match[1];
+      console.log('Plugin name:', pluginName);
+      const pluginQuery = match[2];
+      console.log('Plugin query:', pluginQuery);
+
+      // check if plugin exists
+      if (plugins[match[1]]) {
+        const plugin = plugins[match[1]];
+        console.log('Plugin found:', plugin.name);
+        const pluginResponse = await plugin.function(pluginQuery);
+        console.log('Plugin response:', pluginResponse);
+        // messages.push({ role: 'assistant', content: pluginResponse });
+        // return `${gptMessage}`;
+        gptMessage = await gpt3({...message, member: message.member, content: `${GPT3_PREFIX} Below is the response from the plugin. Please use it to formulate a response to the user:\n${pluginResponse}`} );
+      }
+    } else {
+      console.log('No plugin found in the input text.');
+    }
 
     // if gptMessage is longer than 2000 characters, split it into multiple messages, each less than 2000 characters
     if (gptMessage.length > 2000) {
