@@ -18,6 +18,8 @@ const GPT3_PREFIX = '!!';
 
 const { wolframGetShort } = require('../features/wolfram.js');
 
+const ConversationContext = require('../util/contextManager.js');
+
 const plugins = {
   wolfram: {
     name: 'wolfram',
@@ -31,11 +33,14 @@ const plugins = {
   }
 };
 
-const systemMessage = `You are a helpful assistant written in NodeJS. Answer as concisely as possible. You have access to the following plugins: ${Object.keys(plugins).map(key => `${plugins[key].name}: ${plugins[key].description}`).join(', ')}. To use a plugin, enclose the plugin function and its query in double curly braces. For example, {{wolfram("current weather in New York")}}.`;
+const systemMessage = 
+  {
+    role: 'system',
+    content: `You are a helpful assistant written in NodeJS. Answer as concisely as possible. You have access to the following plugins: ${Object.keys(plugins).map(key => `${plugins[key].name}: ${plugins[key].description}`).join(', ')}. To use a plugin, enclose the plugin function and its query in double curly braces. For example, {{wolfram("current weather in New York")}}.`
+  }
+;
 
-const messages = [
-  { role: 'system', content: systemMessage },
-
+const hints = [
   { role: 'user', content: 'Hello, who are you?' },
   { role: 'assistant', content: 'I am your AI-powered chatbot assistant. How can I help you today?' },
   { role: 'user', content: 'I would like to know the weather in New York.' },
@@ -46,11 +51,16 @@ const messages = [
   { role: 'assistant', content: '{{wolfram("how many golf balls would fit inside the earth?")}}'},
   { role: 'user', content: '1.5 times 10 to the 25 to 1.7 times 10 to the 25'},
   { role: 'assistant', content: 'The number of golf balls that would fit inside the Earth lies somewhere between 15 and 17 septillion.'},
-]
+];
+
+const conversation = new ConversationContext(systemMessage, hints);
+
 
 const gpt3 = async (message) => {
   const member = message.member.id;
   const userPromptWithOptions = message.content.slice(GPT3_PREFIX.length).trim();
+
+  // userPrompt is the string that the user typed, ready to be processed
   const [userPrompt, options] = getOptions(userPromptWithOptions);
 
 
@@ -62,13 +72,16 @@ const gpt3 = async (message) => {
   //   return await createVariation(userPrompt, member, message);
   // }
 
-  manageContext(messages, userPrompt);
+  // add the user's message to the conversation
+  conversation.addMessage('user', userPrompt, message.id, member, message.channelId);
+
+  console.log('sending: ', conversation.getContext());
 
   let response;
   try {
     response = await openai.createChatCompletion({
       model: TEXT_MODEL,
-      messages,
+      messages: conversation.getContext(), // maybe pass in channel id here?
       // temperature: 0.9,
       // max_tokens: 150,
       // top_p: 1,
@@ -90,7 +103,7 @@ const gpt3 = async (message) => {
 
     let gptMessage = response.data.choices[0].message.content.trim();
     console.log('gptMessage:', gptMessage);
-    messages.push({ role: 'assistant', content: gptMessage });
+    // messages.push({ role: 'assistant', content: gptMessage });
 
     // check for plugin usage
     const regex = /\{\{(\w+)\(\"(.*?)\"\)\}\}/;
@@ -115,6 +128,9 @@ const gpt3 = async (message) => {
     } else {
       console.log('No plugin found in the input text.');
     }
+
+    // add the AI's message to the conversation
+    conversation.addMessage('assistant', gptMessage, null, null, message.channelId);
 
     // if gptMessage is longer than 2000 characters, split it into multiple messages, each less than 2000 characters
     if (gptMessage.length > 2000) {
@@ -230,23 +246,23 @@ const createVariation = async (filename, member, message) => {
   }
 };
 
-const manageContext = (messages, userPrompt) => {
-  messages.push({ role: 'user', content: userPrompt });
-  manageContextLength(messages, userPrompt);
-}
+// const manageContext = (messages, userPrompt) => {
+//   messages.push({ role: 'user', content: userPrompt });
+//   manageContextLength(messages, userPrompt);
+// }
 
-const manageContextLength = (messages, userPrompt) => {
-  // check total length of context
-  const totalLength = messages.reduce((acc, cur) => acc + cur.content.length, 0);
+// const manageContextLength = (messages, userPrompt) => {
+//   // check total length of context
+//   const totalLength = messages.reduce((acc, cur) => acc + cur.content.length, 0);
 
-  if (totalLength > CONTEXT_LENGTH) {
-    // remove oldest context
-    messages.shift();
+//   if (totalLength > CONTEXT_LENGTH) {
+//     // remove oldest context
+//     messages.shift();
     
-    // recursively check again
-    return manageContextLength(messages, userPrompt);
-  }
-}
+//     // recursively check again
+//     return manageContextLength(messages, userPrompt);
+//   }
+// }
 
 const invokeSaveFunction = async (url, prompt, member) => {
   const options = {
