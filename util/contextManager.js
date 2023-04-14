@@ -1,39 +1,79 @@
 const { Firestore } = require('@google-cloud/firestore');
 const firestore = new Firestore();
 const CONTEXT_LENGTH = process.env.OPENAI_CONTEXT_LENGTH || 1000;
+const CONTEXT_MESSAGES_LIMIT = process.env.CONTEXT_MESSAGES_LIMIT || 10;
 
 class ConversationContext {
-  constructor(systemMessage, hints) {
+
+  static instances = {};
+
+  static async getConversation(channelId, systemMessage, hints) {
+    if (!this.instances[channelId]) {
+      this.instances[channelId] = new ConversationContext(systemMessage, hints, channelId);
+      await this.instances[channelId].loadContextFromFirestore(channelId);
+    }
+    return this.instances[channelId];
+  }
+
+  static endConversation(channelId) {
+    if (this.instances[channelId]) {
+      delete this.instances[channelId];
+    }
+  }
+
+  constructor(systemMessage, hints, channelId) {
     this.systemMessage = systemMessage;
     this.hints = hints;
     this.context = [];
+    // this.#loadContextFromFirestore(channelId);
   }
 
-    // ('user', userPrompt, message.id, member, message.channelId);
-    addMessage(role, content, id, member, channelId) {
-
-      // get timestamp
-      const timestamp = new Date().toISOString();
-
-      const message = {
-        role,
-        content,
+  async loadContextFromFirestore(channelId) {
+    const channelRef = firestore.collection(`channels/${channelId}/messages`);
+    const snapshot = await channelRef.orderBy('timestamp', 'desc')
+      .limit(CONTEXT_MESSAGES_LIMIT)
+      .get();
+    const messages = [];
+    snapshot.forEach(doc => {
+      const data = {
+        role: doc.get('role'),
+        content: doc.get('message'),
       };
-      
-      this.context.push(message);
-      this.#manageContextLength();
+      messages.push(data);
+    });
 
-      const document = firestore.doc(`messages/${timestamp}`);
+    this.context = messages.reverse(); // Ensure the ordering is from oldest to newest
+  }
 
-      // Enter new data into the document.
-      document.set({
-        id,
-        member,
-        channelId,
-        role,
-        message: content,
-        timestamp,
-      });
+
+  addMessage(role, content, originalMessage) {
+
+    const messageId = role == 'user' ? originalMessage.id : null;
+    const member = role == 'user' ? originalMessage.member.id : null;
+    const channelId = originalMessage.channelId;
+
+    // get timestamp
+    const timestamp = Date.now()
+
+    const message = {
+      role,
+      content,
+    };
+    
+    this.context.push(message);
+    this.#manageContextLength();
+
+    const document = firestore.doc(`channels/${channelId}/messages/${timestamp}`);
+
+    // Enter new data into the document.
+    document.set({
+      id: messageId,
+      member,
+      channelId,
+      role,
+      message: content,
+      timestamp,
+    });
   }
 
   getContext() {

@@ -53,7 +53,7 @@ const hints = [
   { role: 'assistant', content: 'The number of golf balls that would fit inside the Earth lies somewhere between 15 and 17 septillion.'},
 ];
 
-const conversation = new ConversationContext(systemMessage, hints);
+// const conversation = new ConversationContext(systemMessage, hints);
 
 
 const gpt3 = async (message) => {
@@ -73,7 +73,8 @@ const gpt3 = async (message) => {
   // }
 
   // add the user's message to the conversation
-  conversation.addMessage('user', userPrompt, message.id, member, message.channelId);
+  const conversation = await ConversationContext.getConversation(message.channelId, systemMessage, hints);
+  conversation.addMessage('user', userPrompt, message);
 
   console.log('sending: ', conversation.getContext());
 
@@ -130,7 +131,7 @@ const gpt3 = async (message) => {
     }
 
     // add the AI's message to the conversation
-    conversation.addMessage('assistant', gptMessage, null, null, message.channelId);
+    conversation.addMessage('assistant', gptMessage, message);
 
     // if gptMessage is longer than 2000 characters, split it into multiple messages, each less than 2000 characters
     if (gptMessage.length > 2000) {
