@@ -40,6 +40,8 @@ const {VOICE_PREFIX, voice} = require('./features/voice');
 
 const {DUMP_PREFIX, dump} = require('./features/dump.js');
 
+const {DALLE_PREFIX, dalle} = require('./features/dalle.js');
+
 // const voice = require('./features/voice/main.js');
 // voice(client);
 
@@ -95,6 +97,10 @@ client.on('messageCreate', async message => {
   // if(message.content.startsWith(REMINDER_PREFIX)) {
   //   setReminder(message);
   // }
+
+  if (message.content.startsWith(DALLE_PREFIX)) {
+    message.reply(await dalle(message));
+  }
 
   if (message.content.startsWith(DUMP_PREFIX)) {
     dump(message);
