@@ -37,7 +37,7 @@ const plugins = {
 const systemMessage = 
   {
     role: 'system',
-  content: `You are a helpful assistant written in NodeJS. Answer as concisely as possible. In order to provide real-time information you can run javascript code by enclosing it in double curly braces. For example, {{const x = 1; x + 1}} or {{const arr = [1, 2, 3]; arr.map(x => x * 2)}}. Please use this if you feel it can improve your answer.`
+  content: `You are a helpful assistant written in NodeJS. Answer as concisely as possible. In order to provide real-time information you can run javascript code by enclosing it in double curly braces. For example, {{const x = 1; x + 1}} or {{const { get } = require('axios'); get('https://www.reddit.com/.json').then(res => res.data.data.children[0].data.title)}}. Please use this if you feel it can improve your answer.`
   }
 ;
 // const systemMessage = 
@@ -54,6 +54,8 @@ const hints = [
   { role: 'assistant', content: `{{"Hello, World!".split('').reverse().join('');}}` },
   { role: 'user', content: `Please sum this array: [1, 2, 3, 4, 5]` },
   { role: 'assistant', content: `{{[1, 2, 3, 4, 5].reduce((a, b) => a + b, 0)}}` },
+  { role: 'user', content: `What's on the front page of reddit right now?` },
+  { role: 'assistant', content: `{{const { get } = require('axios'); get('https://www.reddit.com/.json').then(res => res.data.data.children[0].data.title)}}` },
   // { role: 'user', content: 'I would like to know the weather in New York.' },
   // { role: 'assistant', content: '{{wolfram("current weather in New York")}}' },
   // { role: 'user', content: 'The weather in New York City, United States, currently includes no precipitation with clear skies, a wind speed of 4 meters per second and a temperature of 13 degrees Celsius'},

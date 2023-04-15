@@ -1,26 +1,27 @@
 const functions = require('@google-cloud/functions-framework');
-const escapeHtml = require('escape-html');
 
-/**
- * Responds to an HTTP request using data from the request body parsed according
- * to the "content-type" header.
- *
- * @param {Object} req Cloud Function request context.
- * @param {Object} res Cloud Function response context.
- */
-functions.http('helloHttp', (req, res) => {
+functions.http('helloHttp', async (req, res) => {
 
   // get the code to execute
   const code = req.body.code;
 
   console.log(req.body);
-  // execute the code
-  const output = eval(code);
+  
+  try {
+    // execute the code
+    let output = eval(code);
 
-  console.log({ result: output });
+    // Check if the output is a Promise and wait for it to resolve
+    if (output instanceof Promise) {
+      output = await output;
+    }
 
-  // send the response
-  res.send({result: output});
+    console.log({ result: output });
 
-  // res.send(`Hello ${escapeHtml(req.query.name || req.body.name || 'World')}!`);
+    // send the response
+    res.send({ result: output });
+  } catch (error) {
+    console.error(`Error executing code: ${error.message}`);
+    res.status(500).send({ error: error.message });
+  }
 });
