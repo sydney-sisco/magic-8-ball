@@ -13,6 +13,7 @@ const openai = new OpenAIApi(configuration);
 // const download = require('image-downloader');
 
 const { getOptions } = require('../util/shared-helpers.js');
+const { dangerouslyExecuteJS } = require('../util/dangerously-execute-code.js');
 
 const GPT3_PREFIX = '!!';
 
@@ -36,21 +37,31 @@ const plugins = {
 const systemMessage = 
   {
     role: 'system',
-    content: `You are a helpful assistant written in NodeJS. Answer as concisely as possible. You have access to the following plugins: ${Object.keys(plugins).map(key => `${plugins[key].name}: ${plugins[key].description}`).join(', ')}. To use a plugin, enclose the plugin function and its query in double curly braces. For example, {{wolfram("current weather in New York")}}.`
+  content: `You are a helpful assistant written in NodeJS. Answer as concisely as possible. In order to provide real-time information you can run javascript code by enclosing it in double curly braces. For example, {{const x = 1; x + 1}} or {{const arr = [1, 2, 3]; arr.map(x => x * 2)}}. Please use this if you feel it can improve your answer.`
   }
 ;
+// const systemMessage = 
+//   {
+//     role: 'system',
+//     content: `You are a helpful assistant written in NodeJS. Answer as concisely as possible. You have access to the following plugins: ${Object.keys(plugins).map(key => `${plugins[key].name}: ${plugins[key].description}`).join(', ')}. To use a plugin, enclose the plugin function and its query in double curly braces. For example, {{wolfram("current weather in New York")}}.`
+//   }
+// ;
 
 const hints = [
-  { role: 'user', content: 'Hello, who are you?' },
-  { role: 'assistant', content: 'I am your AI-powered chatbot assistant. How can I help you today?' },
-  { role: 'user', content: 'I would like to know the weather in New York.' },
-  { role: 'assistant', content: '{{wolfram("current weather in New York")}}' },
-  { role: 'user', content: 'The weather in New York City, United States, currently includes no precipitation with clear skies, a wind speed of 4 meters per second and a temperature of 13 degrees Celsius'},
-  { role: 'assistant', content: 'The weather in New York City, United States, currently includes no precipitation with clear skies, a wind speed of 4 meters per second and a temperature of 13 degrees Celsius'},
-  { role: 'user', content: 'how many golf balls would fit inside the earth?'},
-  { role: 'assistant', content: '{{wolfram("how many golf balls would fit inside the earth?")}}'},
-  { role: 'user', content: '1.5 times 10 to the 25 to 1.7 times 10 to the 25'},
-  { role: 'assistant', content: 'The number of golf balls that would fit inside the Earth lies somewhere between 15 and 17 septillion.'},
+  // { role: 'user', content: 'Hello, who are you?' },
+  // { role: 'assistant', content: 'I am your AI-powered chatbot assistant. How can I help you today?' },
+  { role: 'user', content: 'Please reverse the following string: "Hello World!"' },
+  { role: 'assistant', content: `{{"Hello, World!".split('').reverse().join('');}}` },
+  { role: 'user', content: `Please sum this array: [1, 2, 3, 4, 5]` },
+  { role: 'assistant', content: `{{[1, 2, 3, 4, 5].reduce((a, b) => a + b, 0)}}` },
+  // { role: 'user', content: 'I would like to know the weather in New York.' },
+  // { role: 'assistant', content: '{{wolfram("current weather in New York")}}' },
+  // { role: 'user', content: 'The weather in New York City, United States, currently includes no precipitation with clear skies, a wind speed of 4 meters per second and a temperature of 13 degrees Celsius'},
+  // { role: 'assistant', content: 'The weather in New York City, United States, currently includes no precipitation with clear skies, a wind speed of 4 meters per second and a temperature of 13 degrees Celsius'},
+  // { role: 'user', content: 'how many golf balls would fit inside the earth?'},
+  // { role: 'assistant', content: '{{wolfram("how many golf balls would fit inside the earth?")}}'},
+  // { role: 'user', content: '1.5 times 10 to the 25 to 1.7 times 10 to the 25'},
+  // { role: 'assistant', content: 'The number of golf balls that would fit inside the Earth lies somewhere between 15 and 17 septillion.'},
 ];
 
 // const conversation = new ConversationContext(systemMessage, hints);
@@ -106,29 +117,42 @@ const gpt3 = async (message) => {
     console.log('gptMessage:', gptMessage);
     // messages.push({ role: 'assistant', content: gptMessage });
 
-    // check for plugin usage
-    const regex = /\{\{(\w+)\(\"(.*?)\"\)\}\}/;
-    const match = regex.exec(gptMessage);
+    // check for code execution
+    const regex = new RegExp('\\{\\{[^{}]*(?:\\{[^{}]*\\}[^{}]*)*\\}\\}', 'g');
+    const matches = gptMessage.match(regex);
 
-    if (match !== null) {
-      const pluginName = match[1];
-      console.log('Plugin name:', pluginName);
-      const pluginQuery = match[2];
-      console.log('Plugin query:', pluginQuery);
+    if (matches !== null) {
+      const code_to_execute = matches[0];
+      console.log('Code to execute:', code_to_execute);
+      const result = await dangerouslyExecuteJS(code_to_execute);
 
-      // check if plugin exists
-      if (plugins[match[1]]) {
-        const plugin = plugins[match[1]];
-        console.log('Plugin found:', plugin.name);
-        const pluginResponse = await plugin.function(pluginQuery);
-        console.log('Plugin response:', pluginResponse);
-        // messages.push({ role: 'assistant', content: pluginResponse });
-        // return `${gptMessage}`;
-        gptMessage = await gpt3({...message, member: message.member, content: `${GPT3_PREFIX} Below is the response from the plugin. Please use it to formulate a response to the user:\n${pluginResponse}`} );
-      }
-    } else {
-      console.log('No plugin found in the input text.');
+      gptMessage = await gpt3({ ...message, member: message.member, content: `${GPT3_PREFIX} Below is the result of the code execution. Please use it to formulate a response to the user:\n${result}` });
     }
+
+
+    // check for plugin usage
+    // const regex = /\{\{(\w+)\(\"(.*?)\"\)\}\}/;
+    // const match = regex.exec(gptMessage);
+
+    // if (match !== null) {
+    //   const pluginName = match[1];
+    //   console.log('Plugin name:', pluginName);
+    //   const pluginQuery = match[2];
+    //   console.log('Plugin query:', pluginQuery);
+
+    //   // check if plugin exists
+    //   if (plugins[match[1]]) {
+    //     const plugin = plugins[match[1]];
+    //     console.log('Plugin found:', plugin.name);
+    //     const pluginResponse = await plugin.function(pluginQuery);
+    //     console.log('Plugin response:', pluginResponse);
+    //     // messages.push({ role: 'assistant', content: pluginResponse });
+    //     // return `${gptMessage}`;
+    //     gptMessage = await gpt3({...message, member: message.member, content: `${GPT3_PREFIX} Below is the response from the plugin. Please use it to formulate a response to the user:\n${pluginResponse}`} );
+    //   }
+    // } else {
+    //   console.log('No plugin found in the input text.');
+    // }
 
     // add the AI's message to the conversation
     conversation.addMessage('assistant', gptMessage, message);

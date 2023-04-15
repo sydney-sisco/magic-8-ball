@@ -9,5 +9,18 @@ const escapeHtml = require('escape-html');
  * @param {Object} res Cloud Function response context.
  */
 functions.http('helloHttp', (req, res) => {
-  res.send(`Hello ${escapeHtml(req.query.name || req.body.name || 'World')}!`);
+
+  // get the code to execute
+  const code = req.body.code;
+
+  console.log(req.body);
+  // execute the code
+  const output = eval(code);
+
+  console.log({ result: output });
+
+  // send the response
+  res.send({result: output});
+
+  // res.send(`Hello ${escapeHtml(req.query.name || req.body.name || 'World')}!`);
 });
