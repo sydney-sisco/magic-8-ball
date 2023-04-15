@@ -1,15 +1,18 @@
 // accept a string of code and send it to the function to be executed
 
+const JS_CODE_EXECUTION_ENDPOINT = process.env.JS_CODE_EXECUTION_ENDPOINT;
 // Cloud Functions uses your function's url as the `targetAudience` value
-const targetAudience = 'https://us-central1-magic-8-ball-381203.cloudfunctions.net/helloHttp';
+const targetAudience = JS_CODE_EXECUTION_ENDPOINT;
 // For Cloud Functions, endpoint (`url`) and `targetAudience` should be equal
 const url = targetAudience;
 
+GOOGLE_APPLICATION_CREDENTIALS = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+GCP_PROJECT_ID = process.env.GCP_PROJECT_ID;
 
 const { GoogleAuth } = require('google-auth-library');
 const options = {
-  keyFilename: 'gcp.json',
-  projectId: 'magic-8-ball-381203',
+  keyFilename: GOOGLE_APPLICATION_CREDENTIALS,
+  projectId: GCP_PROJECT_ID,
 };
 const auth = new GoogleAuth(options);
 

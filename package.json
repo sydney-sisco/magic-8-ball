@@ -21,6 +21,7 @@
     "didyoumean": "^1.2.2",
     "discord.js": "^14.6.0",
     "dotenv": "^8.2.0",
+    "google-auth-library": "^8.7.0",
     "image-downloader": "^4.3.0",
     "libsodium-wrappers": "^0.7.11",
     "openai": "^3.2.1",
