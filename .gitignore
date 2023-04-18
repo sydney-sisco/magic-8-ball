@@ -124,5 +124,6 @@ dist
 .pnp.*
 
 config.json
+settings.json
 images/*.png
 gcp.json

@@ -24,3 +24,11 @@ This bot can do more than just see the future! The current list of features incl
 
 `gcloud config configurations activate magic-8-ball`
 `gcloud auth application-default login`
+
+List of all API voices [here](https://cloud.google.com/text-to-speech/docs/voices).
+
+### Testing
+
+We now have test! To run them, use
+
+`npm run test`

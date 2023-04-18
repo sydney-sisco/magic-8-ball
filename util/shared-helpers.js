@@ -10,6 +10,26 @@ const trim = message => {
   return message.split(' -').shift();
 }
 
+function parseCommandOptions(argsString) {
+  const args = argsString.split(' ');
+  const options = {};
+
+  for (let i = 0; i < args.length; i++) {
+    if (args[i].startsWith('-')) {
+      const optionName = args[i].substr(1);
+      if (i + 1 < args.length && !args[i + 1].startsWith('-')) {
+        options[optionName] = args[i + 1];
+        i++;
+      } else {
+        options[optionName] = true;
+      }
+    }
+  }
+
+  return options;
+}
+
 module.exports = {
-  getOptions
+  getOptions,
+  parseCommandOptions,
 };
