@@ -1,53 +1,55 @@
 const textToSpeech = require('@google-cloud/text-to-speech');
 const fs = require('fs');
 const util = require('util');
-
-const { createReadStream } = require('node:fs');
 const { join } = require('node:path');
 
 const {
   joinVoiceChannel,
-  VoiceConnectionStatus,
   createAudioPlayer,
   createAudioResource,
-  StreamType,
+  AudioPlayerStatus,
 } = require('@discordjs/voice');
 
 const client = new textToSpeech.TextToSpeechClient();
 async function generateAudio(text) {
-  // const text = 'hello, world!';
-  // const text = 'こんにちは、世界！';
-//   const text = `. Intergalactic Taco Invasion: Mysterious aliens have infiltrated the United States under the guise of a popular fast-food chain, "Galactic Tacos." They've been secretly collecting human data through taco sales and causing an uncontrollable craving for tacos in millions of people. Brace yourselves for the impending "Tacopalypse!"
-// 2. Sudden Outbreak of Polka-Dotitis: A peculiar disease called "Polka-Dotitis" has taken over the country, causing people to develop brightly colored polka dots all over their bodies. No one knows how the outbreak started or how to cure it, but one thing's for sure – everyone's fashion sense has skyrocketed!
-// 3. Gravity-Defying Shoes Craze: An inventor created shoes that defy gravity, giving people the ability to float and walk on air. While this breakthrough seemed amazing at first, chaos ensued as individuals began floating away uncontrollably, and rooftops became the new sidewalks. The world has turned upside down, quite literally!
-// 4. Pogo-Stick Pigeons Running Amok: A mysterious lab experiment resulted in super-intelligent pigeons capable of riding pogo sticks. These birds have taken to the streets, bouncing around on their pogo sticks and causing mayhem everywhere they go. Beware of the bird droppings from the sky!
-// 5. Attack of the Jumbo Gummy Bears: An enormous batch of gummy bears mutated in a candy factory, turning them into giant, bouncing, multicolored beasts. These giant gummy bears have now invaded cities, causing widespread panic as they bounce their way through the streets, crushing cars and toppling buildings in their path.`
+  try {
+    const request = {
+      input: { text: text },
+      voice: {
+        // languageCode: "en-AU",
+        // name: "en-AU-News-E",
+        // ssmlGender: "FEMALE"
+        languageCode: "en-US",
+        name: "en-US-Studio-O",
+        ssmlGender: "FEMALE"
+        // languageCode: "ja-JP",
+        // name: "ja-JP-Neural2-B",
+        // ssmlGender: "FEMALE"
+        // languageCode: "ja-JP",
+        // name: "ja-JP-Neural2-D",
+        // ssmlGender: "MALE"
+      },
+      audioConfig: { audioEncoding: 'MP3' },
+    };
+    
+    const [response] = await client.synthesizeSpeech(request);
 
-
-  const request = {
-    input: { text: text },
-    voice: {
-      languageCode: "en-US",
-      name: "en-US-Studio-O",
-      ssmlGender: "FEMALE"
-      // languageCode: "ja-JP",
-      // name: "ja-JP-Neural2-B",
-      // ssmlGender: "FEMALE"
-    },
-    audioConfig: { audioEncoding: 'MP3' },
-  };
-
-  const [response] = await client.synthesizeSpeech(request);
-  
-  // Write the binary audio content to a local file
-  const writeFile = util.promisify(fs.writeFile);
-  await writeFile(join(__dirname, 'output.mp3'), response.audioContent, 'binary');
-  console.log('Audio content written to file: output.mp3');
+    // Write the binary audio content to a local file
+    const filename = `output-${Date.now()}.mp3`;
+    const writeFile = util.promisify(fs.writeFile);
+    await writeFile(join(__dirname, filename), response.audioContent, 'binary');
+    console.log(`Audio content written to file: ${filename}`);
+    return filename;
+  }
+  catch (error) {
+    console.error(error);
+    throw error;
+  }
 }
-// quickStart();
 
 const { getOptions } = require('../util/shared-helpers.js');
 const VOICE_PREFIX = '!say';
+const audioQueue = [];
 
 async function connectToChannel(channel) {
   /**
@@ -62,33 +64,6 @@ async function connectToChannel(channel) {
   })
 
   return connection;
-
-  /**
-   * If we're dealing with a connection that isn't yet Ready, we can set a reasonable
-   * time limit before giving up. In this example, we give the voice connection 30 seconds
-   * to enter the ready state before giving up.
-   */
-  // try {
-  //   /**
-  //    * Allow ourselves 30 seconds to join the voice channel. If we do not join within then,
-  //    * an error is thrown.
-  //    */
-  //   await entersState(connection, VoiceConnectionStatus.Ready, 30_000)
-  //   /**
-  //    * At this point, the voice connection is ready within 30 seconds! This means we can
-  //    * start playing audio in the voice channel. We return the connection so it can be
-  //    * used by the caller.
-  //    */
-  //   return connection
-  // } catch (error) {
-  //   /**
-  //    * At this point, the voice connection has not entered the Ready state. We should make
-  //    * sure to destroy it, and propagate the error by throwing it, so that the calling function
-  //    * is aware that we failed to connect to the channel.
-  //    */
-  //   connection.destroy()
-  //   throw error
-  // }
 }
 
 const voice = async (message) => {
@@ -96,38 +71,50 @@ const voice = async (message) => {
   const userPromptWithOptions = message.content.slice(VOICE_PREFIX.length).trim();
   const [userPrompt, options] = getOptions(userPromptWithOptions);
 
-  console.log(userPrompt);
+  console.log('user prompt for voice: ', userPrompt);
 
-  // const connection = joinVoiceChannel({
-  //   channelId: message.channel.id,
-  //   guildId: message.channel.guild.id,
-  //   adapterCreator: message.channel.guild.voiceAdapterCreator,
-  // });
-
-  await generateAudio(userPrompt);
+  try {
+    const filename = await generateAudio(userPrompt);
+    // Add the generated audio file path to the queue
+    audioQueue.push(filename);
+  }
+  catch (error) {
+    console.error(error);
+    return message.reply('Error generating audio: ' + error.message);
+  }
 
   const connection = await connectToChannel(message.member?.voice.channel);
 
-  connection.on(VoiceConnectionStatus.Ready, async () => {
-    console.log('The connection has entered the Ready state - ready to play audio!');
-
-    // sleep 1 second using await
-    // await sleep(1000);
-    const player = createAudioPlayer();
-
-    // play a local file
-    resource = createAudioResource(join(__dirname, 'output.mp3'));
-
-    // play a remote file
-    // const resource = createAudioResource("https://storage.googleapis.com/photo-gallery-8072626/samples/goo.mp3")
-
-    player.play(resource);
-    connection.subscribe(player);
-  });
-
-
-
+  playAudio(connection);
 };
+
+const audioPlayer = createAudioPlayer();
+
+async function playAudio(connection) {
+
+  // If audioPlayer is not playing and there's an audio file in the queue, play it
+  if (
+    audioPlayer.state.status !== AudioPlayerStatus.Playing &&
+    audioQueue.length > 0
+  ) {
+    const fileToPlay = audioQueue.shift(); // Get the first file from the queue and remove it
+    const audioResource = createAudioResource(join(__dirname, fileToPlay));
+
+    audioPlayer.play(audioResource);
+    connection.subscribe(audioPlayer);
+
+    audioPlayer.on('error', (error) => {
+      console.error('Error occurred during audio playback:', error);
+    });
+
+    audioPlayer.on(AudioPlayerStatus.Idle, () => {
+      if (audioQueue.length > 0) {
+        playAudio(connection); // If there are more files in the queue, play the next one
+      }
+    });
+  }
+}
+
 module.exports = {
   VOICE_PREFIX,
   voice
