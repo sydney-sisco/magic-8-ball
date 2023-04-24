@@ -1,5 +1,14 @@
 const functions = require('@google-cloud/functions-framework');
 
+const axios = require('axios');
+// const cheerio = require('cheerio');
+// const _ = require('lodash');
+// const math = require('mathjs');
+// const moment = require('moment');
+// const natural = require('natural');
+// const fetch = require('node-fetch');
+
+
 functions.http('helloHttp', async (req, res) => {
 
   // get the code to execute

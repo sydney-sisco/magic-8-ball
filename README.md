@@ -27,6 +27,14 @@ This bot can do more than just see the future! The current list of features incl
 
 List of all API voices [here](https://cloud.google.com/text-to-speech/docs/voices).
 
+#### Serverless Functions
+
+To run:
+`cd functions`
+`cd <function name>`
+`npm run start`
+
+
 ### Testing
 
 We now have test! To run them, use

@@ -23,18 +23,12 @@ async function request(code_to_execute) {
   const res = await client.request({url,
     method: 'POST',
     data: {
-      // code: 'const arr = [1, 2, 3]; arr.map(x => x * 2)',
       code: code_to_execute,
     },
   });
-  console.info('data: ', res.data);
+  console.info('data: ', res.data?.result);
   return res.data?.result;
 }
-
-// request().catch(err => {
-//   console.error('err: ', err.message);
-//   process.exitCode = 1;
-// });
 
 module.exports = {
   dangerouslyExecuteJS: request,
