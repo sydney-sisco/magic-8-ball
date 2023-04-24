@@ -1,16 +1,11 @@
 var fs = require('fs');
-// var axios = require('axios');
-const CONTEXT_LENGTH = process.env.OPENAI_CONTEXT_LENGTH || 1000;
 const TEXT_MODEL = process.env.OPENAI_TEXT_MODEL || 'text-ada-001';
 
-// const { EmbedBuilder } = require('discord.js');
 const { Configuration, OpenAIApi } = require("openai");
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
 });
 const openai = new OpenAIApi(configuration);
-
-// const download = require('image-downloader');
 
 const { getOptions } = require('../util/shared-helpers.js');
 const { dangerouslyExecuteJS } = require('../util/dangerously-execute-code.js');
@@ -34,12 +29,72 @@ const plugins = {
   }
 };
 
-const systemMessage = 
+
+const systemMessages = [
   {
-    role: 'system',
-  content: `You are a helpful assistant written in NodeJS. Answer as concisely as possible. In order to provide real-time information you can run javascript code by enclosing it in double curly braces. For example, {{const x = 1; x + 1}} or {{const { get } = require('axios'); get('https://www.reddit.com/.json').then(res => res.data.data.children[0].data.title)}}. Please use this if you feel it can improve your answer.`
-  }
-;
+    role: 'default',
+    shortName: 'default',
+    systemMessage: 
+      {
+        role: 'system',
+        content: `You are a helpful Discord bot written in NodeJS v16. Please try to answer as concisely as possible. Your messages must be fewer than 2000 characters.`,
+      },
+    hints: [
+
+    ],
+  },
+
+      {
+      name: 'code-writing-bot',
+      shortName: 'code',
+      systemMessage: {  
+        role: 'system',
+        content: `You are a code writing bot. 
+        You write NodeJS 16 code.
+        You will be given a question and must write code that will assist in acquiring an answer.
+        Please return the code enclosed in double brackets <<like this>>.
+        Do not add comments. 
+        Do not add commentary.`
+        // Your code runs in the following environment.         
+// const functions = require('@google-cloud/functions-framework');
+// const axios = require('axios');
+// const cheerio = require('cheerio');
+// const _ = require('lodash');
+// const math = require('mathjs');
+// const moment = require('moment');
+// const natural = require('natural');
+// const fetch = require('node-fetch');
+// functions.http('helloHttp', async (req, res) => {
+//   // get the code to execute
+//   const code = req.body.code;
+//   try {
+//     // execute the code
+//     let output = eval(code);
+//     // Check if the output is a Promise and wait for it to resolve
+//     if (output instanceof Promise) {
+//       output = await output;
+//     }
+//     // send the response
+//     res.send({ result: output });
+//   } catch (error) {
+//     console.error(\`Error executing code: \${ error.message }\`);
+//     res.status(500).send({ error: error.message });
+//   }
+// });
+// `
+    },
+      hints: [
+        { role: 'user', content: 'top post on reddit about cats' },
+        { role: 'assistant', content: `
+  <<const findHighestCatPost = async () => {
+  const response = await axios.get('https://www.reddit.com/.json');
+  const catPosts = response.data.data.children.filter(post => post.data.title.toLowerCase().includes('cat'));
+  const highestCatPost = catPosts.reduce((highest, post) => post.data.ups > highest.data.ups ? post : highest);
+  return highestCatPost.data.permalink;}findHighestCatPost();>>` },
+  ],
+  },
+];
+
 // const systemMessage = 
 //   {
 //     role: 'system',
@@ -50,14 +105,16 @@ const systemMessage =
 const hints = [
   // { role: 'user', content: 'Hello, who are you?' },
   // { role: 'assistant', content: 'I am your AI-powered chatbot assistant. How can I help you today?' },
-  { role: 'user', content: 'Please reverse the following string: "Hello World!"' },
-  { role: 'assistant', content: `{{"Hello, World!".split('').reverse().join('');}}` },
-  { role: 'user', content: `Please sum this array: [1, 2, 3, 4, 5]` },
-  { role: 'assistant', content: `{{[1, 2, 3, 4, 5].reduce((a, b) => a + b, 0)}}` },
-  { role: 'user', content: `What's on the front page of reddit right now?` },
-  { role: 'assistant', content: `{{const { get } = require('axios'); get('https://www.reddit.com/.json').then(res => res.data.data.children[0].data.title)}}` },
-  { role: 'user', content: `what's the current price of gas in seattle?` },
-  { role: 'assistant', content: `{{const { get } = require('axios'); get('https://www.gasbuddy.com/home?search=Seattle&fuel=1').then(res => {const regex = /(\$[\d]+\.[\d]+)/; const matched = res.data.match(regex); return matched[0];})}}` },
+  { role: 'user', content: 'top post on reddit about cats' },
+  { role: 'assistant', content: `<<const findHighestCatPost = async () => {const response = await axios.get('https://www.reddit.com/.json');const catPosts = response.data.data.children.filter(post => post.data.title.toLowerCase().includes('cat'));const highestCatPost = catPosts.reduce((highest, post) => post.data.ups > highest.data.ups ? post : highest);return highestCatPost.data.permalink;}findHighestCatPost();>>`}
+  // { role: 'user', content: 'Please reverse the following string: "Hello World!"' },
+  // { role: 'assistant', content: `{{"Hello, World!".split('').reverse().join('');}}` },
+  // { role: 'user', content: `Please sum this array: [1, 2, 3, 4, 5]` },
+  // { role: 'assistant', content: `{{[1, 2, 3, 4, 5].reduce((a, b) => a + b, 0)}}` },
+  // { role: 'user', content: `What's on the front page of reddit right now?` },
+  // { role: 'assistant', content: `{{const { get } = require('axios'); get('https://www.reddit.com/.json').then(res => res.data.data.children[0].data.title)}}` },
+  // { role: 'user', content: `what's the current price of gas in seattle?` },
+  // { role: 'assistant', content: `{{const { get } = require('axios'); get('https://www.gasbuddy.com/home?search=Seattle&fuel=1').then(res => {const regex = /(\$[\d]+\.[\d]+)/; const matched = res.data.match(regex); return matched[0];})}}` },
   // { role: 'user', content: 'I would like to know the weather in New York.' },
   // { role: 'assistant', content: '{{wolfram("current weather in New York")}}' },
   // { role: 'user', content: 'The weather in New York City, United States, currently includes no precipitation with clear skies, a wind speed of 4 meters per second and a temperature of 13 degrees Celsius'},
@@ -68,27 +125,26 @@ const hints = [
   // { role: 'assistant', content: 'The number of golf balls that would fit inside the Earth lies somewhere between 15 and 17 septillion.'},
 ];
 
-// const conversation = new ConversationContext(systemMessage, hints);
-
-
 const gpt3 = async (message) => {
-  const member = message.member.id;
+  const member = message.member;
+  const memberId = member.id;
+
   const userPromptWithOptions = message.content.slice(GPT3_PREFIX.length).trim();
 
   // userPrompt is the string that the user typed, ready to be processed
   const [userPrompt, options] = getOptions(userPromptWithOptions);
 
-
-  // if (options.includes('i')) {
-  //   return await createImage(userPrompt, member, message);
-  // }
-
-  // if (options.includes('v')) {
-  //   return await createVariation(userPrompt, member, message);
-  // }
+  let conversation;
+  if (options.includes('c')) {
+    const context = systemMessages.find(sm => sm.shortName === 'code')
+    conversation = await ConversationContext.getNoContext(context.systemMessage, context.hints);
+  }
+  else {
+    const context = systemMessages.find(sm => sm.shortName === 'default')
+    conversation = await ConversationContext.getConversation(message.channelId, context.systemMessage, context.hints);
+  }
 
   // add the user's message to the conversation
-  const conversation = await ConversationContext.getConversation(message.channelId, systemMessage, hints);
   conversation.addMessage('user', userPrompt, message);
 
   console.log('sending: ', conversation.getContext());
@@ -103,7 +159,7 @@ const gpt3 = async (message) => {
       // top_p: 1,
       // frequency_penalty: 0,
       // presence_penalty: 0.6,
-      user: member,
+      user: memberId,
     });
 
     if (!response) {
@@ -121,16 +177,14 @@ const gpt3 = async (message) => {
     console.log('gptMessage:', gptMessage);
     // messages.push({ role: 'assistant', content: gptMessage });
 
-    // check for code execution
-    const regex = new RegExp('\\{\\{[^{}]*(?:\\{[^{}]*\\}[^{}]*)*\\}\\}', 'g');
-    const matches = gptMessage.match(regex);
+    // if first two characters are << and last two characters are >>, then we have code to execute
+    if (gptMessage.slice(0, 2) === '<<' && gptMessage.slice(-2) === '>>') {
+      const code_to_execute = gptMessage.slice(2, -2);
 
-    if (matches !== null) {
-      const code_to_execute = matches[0];
       console.log('Code to execute:', code_to_execute);
-      const result = await dangerouslyExecuteJS(code_to_execute);
 
-      gptMessage = await gpt3({ ...message, member: message.member, content: `${GPT3_PREFIX} Below is the result of the code execution. Please use it to formulate a response to the user:\n${result}` });
+      const result = await dangerouslyExecuteJS(code_to_execute);
+      gptMessage = await gpt3({ ...message, member: {id: memberId, ...member}, content: `${GPT3_PREFIX} Below is the result of the code execution. Please use it to formulate a response to the user:\n${result}` });
     }
 
 

@@ -9,10 +9,18 @@ class ConversationContext {
 
   static async getConversation(channelId, systemMessage, hints) {
     if (!this.instances[channelId]) {
-      this.instances[channelId] = new ConversationContext(systemMessage, hints, channelId);
-      await this.instances[channelId].loadContextFromFirestore(channelId);
+      this.instances[channelId] = new ConversationContext(systemMessage, hints);
+
+      // allow context skip by passing falsy channelId
+      if (channelId) {
+        await this.instances[channelId].loadContextFromFirestore(channelId);
+      }
     }
     return this.instances[channelId];
+  }
+
+  static async getNoContext(systemMessage, hints) {
+    return new ConversationContext(systemMessage, hints);
   }
 
   static endConversation(channelId) {
@@ -21,11 +29,10 @@ class ConversationContext {
     }
   }
 
-  constructor(systemMessage, hints, channelId) {
+  constructor(systemMessage, hints) {
     this.systemMessage = systemMessage;
     this.hints = hints;
     this.context = [];
-    // this.#loadContextFromFirestore(channelId);
   }
 
   async loadContextFromFirestore(channelId) {
