@@ -4,10 +4,10 @@
   "description": "",
   "main": "magic-8-ball.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --watch",
     "dev": "nodemon .",
     "start": "node magic-8-ball.js",
-    "debug": "nodemon --inspect magic-8-ball.js"
+    "debug": "nodemon --ignore '/tests' --inspect magic-8-ball.js"
   },
   "keywords": [],
   "author": "",
