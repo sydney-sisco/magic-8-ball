@@ -11,12 +11,17 @@ const trim = message => {
 }
 
 function parseCommandOptions(argsString) {
-  const args = argsString.split(' ');
+  if (!argsString || argsString.trim() === '') {
+    return {};
+  }
+
+  const args = argsString.match(/(".*?"|[^"\s]+)+(?=\s*|\s*$)/g).map(arg => arg.replace(/"/g, ''));
   const options = {};
 
   for (let i = 0; i < args.length; i++) {
     if (args[i].startsWith('-')) {
-      const optionName = args[i].substr(1);
+      const isDoubleHyphen = args[i].startsWith('--');
+      const optionName = isDoubleHyphen ? args[i].substr(2) : args[i].substr(1);
       if (i + 1 < args.length && !args[i + 1].startsWith('-')) {
         options[optionName] = args[i + 1];
         i++;
