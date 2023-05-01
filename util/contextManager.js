@@ -3,18 +3,26 @@ const firestore = new Firestore();
 const CONTEXT_LENGTH = process.env.OPENAI_CONTEXT_LENGTH || 1000;
 const CONTEXT_MESSAGES_LIMIT = process.env.CONTEXT_MESSAGES_LIMIT || 10;
 
+const defaultSystemMessage = `You are a helpful Discord bot written in NodeJS v16. Please try to answer as concisely as possible. Your messages must be fewer than 2000 characters.`;
+
 class ConversationContext {
 
   static instances = {};
 
-  static async getConversation(channelId, systemMessage, hints) {
+  // returns a ConversationContext instance for the given channelId
+  static async getConversation(channelId) {
+    
+    // if the context is not in memory, try loading it from firestore
     if (!this.instances[channelId]) {
-      this.instances[channelId] = new ConversationContext(systemMessage, hints);
+      this.instances[channelId] = new ConversationContext(channelId);
 
       // allow context skip by passing falsy channelId
-      if (channelId) {
-        await this.instances[channelId].loadContextFromFirestore(channelId);
+      // TODO: probably remove this
+      if (!channelId) {
+        return this.instances[channelId];
       }
+
+      await this.instances[channelId].init();
     }
     return this.instances[channelId];
   }
@@ -29,13 +37,21 @@ class ConversationContext {
     }
   }
 
-  constructor(systemMessage, hints) {
-    this.systemMessage = systemMessage;
-    this.hints = hints;
+  constructor(channelId) {
+    this.channelId = channelId;
     this.context = [];
+    this.systemMessage = null;
   }
 
-  async loadContextFromFirestore(channelId) {
+  // fetches system message and context from firestore
+  // TODO: use Promise.all to fetch both at the same time
+  async init() {
+    this.context = await this.loadContextFromFirestore();
+    this.systemMessage = await this.loadSystemMessageFromFirestore();
+  }
+
+  async loadContextFromFirestore() {
+    const channelId = this.channelId;
     const channelRef = firestore.collection(`channels/${channelId}/messages`);
     const snapshot = await channelRef.orderBy('timestamp', 'desc')
       .limit(CONTEXT_MESSAGES_LIMIT)
@@ -49,9 +65,46 @@ class ConversationContext {
       messages.push(data);
     });
 
-    this.context = messages.reverse(); // Ensure the ordering is from oldest to newest
+    return messages.reverse(); // Ensure the ordering is from oldest to newest
   }
 
+  // loads the system message from firestore and sets it if it exists
+  async loadSystemMessageFromFirestore() {
+    const channelId = this.channelId;
+    const docSnapshot = await firestore.doc(`channels/${channelId}`).get();
+    const systemMessage = docSnapshot.exists ? docSnapshot.get('systemMessage') : null;
+
+    if (systemMessage) {
+      return {
+        role: 'system',
+        content: systemMessage,
+      };
+    }
+
+    return null;
+  }
+
+  // accepts a string, sets it as the system message and saves it to firestore
+  async setSystemMessage(systemMessage) {
+    const systemMessageObj = {
+      role: 'system',
+      content: systemMessage,
+    };
+    this.systemMessage = systemMessageObj;
+
+    // save system message to firestore
+    const docRef = firestore.doc(`channels/${this.channelId}`);
+    const docSnapshot = await docRef.get();
+    if (docSnapshot.exists) {
+      const systemMessage = docSnapshot.get('systemMessage');
+      console.log('System Message:', systemMessage);
+    }
+
+    // save system message to firestore
+    docRef.set({
+      systemMessage,
+    });
+  }
 
   addMessage(role, content, originalMessage) {
 
@@ -84,7 +137,20 @@ class ConversationContext {
   }
 
   getContext() {
-    return [this.systemMessage, ...this.hints, ...this.context];
+    // return [this.systemMessage, ...this.hints, ...this.context];
+
+    const context = this.context;
+
+    // if there is no system message, return default system message
+    let systemMessage = this.systemMessage;
+    if (!this.systemMessage) {
+      systemMessage = {
+        role: 'system',
+        content: defaultSystemMessage,
+      };
+    }
+
+    return [systemMessage, ...this.context];
   }
 
   #manageContextLength = () => {

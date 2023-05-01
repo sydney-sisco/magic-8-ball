@@ -137,11 +137,16 @@ const gpt3 = async (message) => {
   let conversation;
   if (options.includes('c')) {
     const context = systemMessages.find(sm => sm.shortName === 'code')
-    conversation = await ConversationContext.getNoContext(context.systemMessage, context.hints);
+    conversation = await ConversationContext.getNoContext(context.systemMessage.content, context.hints);
+  } else {
+    conversation = await ConversationContext.getConversation(message.channelId);
   }
-  else {
-    const context = systemMessages.find(sm => sm.shortName === 'default')
-    conversation = await ConversationContext.getConversation(message.channelId, context.systemMessage, context.hints);
+
+  // check userPrompt for commands
+  if (userPrompt.startsWith('!set')) {
+    const customSystemMessage = userPrompt.slice('!set'.length).trim();
+    conversation.setSystemMessage(customSystemMessage);
+    return 'System message set for channel.';
   }
 
   // add the user's message to the conversation
