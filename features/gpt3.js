@@ -147,6 +147,13 @@ const gpt3 = async (message) => {
     const customSystemMessage = userPrompt.slice('!set'.length).trim();
     conversation.setSystemMessage(customSystemMessage);
     return 'System message set for channel.';
+  } else if (userPrompt.startsWith('!reset')) {
+    conversation.resetSystemMessage();
+    return 'System message reset for channel.';
+  } else if (userPrompt.startsWith('!show')) {
+    return `System message: ${conversation.getSystemMessage()}`;
+  } else if (userPrompt.startsWith('!help')) {
+    return 'Commands: !set <system message>, !reset, !show';
   }
 
   // add the user's message to the conversation

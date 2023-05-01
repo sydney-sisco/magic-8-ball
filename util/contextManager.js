@@ -106,6 +106,14 @@ class ConversationContext {
     });
   }
 
+  getSystemMessage() {
+    return this.systemMessage?.content || defaultSystemMessage;
+  }
+
+  resetSystemMessage() {
+    this.setSystemMessage('');
+  }
+
   addMessage(role, content, originalMessage) {
 
     const messageId = role == 'user' ? originalMessage.id : null;
