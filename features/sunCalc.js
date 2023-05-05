@@ -26,7 +26,7 @@ const getMoonPhase = message => {
     phaseEmoji = '🌔';
   } else if (phase >= 0.5 - tolerance && phase <= 0.5 + tolerance) {
     phaseName = 'Full Moon';
-    phaseEmoji = '🌕';
+    phaseEmoji = '🌕<:walf:1103900569145462886>';
   } else if (phase < 0.75) {
     phaseName = 'Waning Gibbous';
     phaseEmoji = '🌖';
