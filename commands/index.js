@@ -1,11 +1,10 @@
 const sunCalc = require('./sunCalc.js');
-// const weather = require('./weather.js');
-
+const source = require('./source.js');
 
 // commands here will be loaded
 const commandsToLoad = [
   sunCalc,
-  // weather,
+  source,
 ];
 
 function loadCommands() {
