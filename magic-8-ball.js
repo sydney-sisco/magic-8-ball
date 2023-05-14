@@ -32,8 +32,6 @@ const POKEMON_PREFIX = '!p';
 
 const {GPT3_PREFIX, gpt3} = require('./features/gpt3');
 
-const {VOICE_PREFIX, voice} = require('./features/voice');
-
 const {DUMP_PREFIX, dump} = require('./features/dump.js');
 
 const {DALLE_PREFIX, dalle} = require('./features/dalle.js');
@@ -96,10 +94,6 @@ client.on('messageCreate', async message => {
   if (message.content.startsWith(DUMP_PREFIX)) {
     dump(message);
     return;
-  }
-
-  if (message.content.startsWith(VOICE_PREFIX)) {
-    voice(message);
   }
 
   if (message.content.startsWith(GPT3_PREFIX)) {
@@ -219,12 +213,6 @@ client.on('messageCreate', async message => {
     .then(data => message.reply(data))
     .catch(err => message.reply(err.toString()));
   }
-
-  // if (message.content.startsWith(MOON_PREFIX)) {
-  //   const moonData = moon.getMoonPhase(message);
-
-  //   message.reply(moonData);
-  // }
 
   if (message.content.startsWith(WOLFRAM_PREFIX)) {
     wolfram.wolframGetShort(message)

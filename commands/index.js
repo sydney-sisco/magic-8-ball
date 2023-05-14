@@ -1,10 +1,12 @@
 const sunCalc = require('./sunCalc.js');
 const source = require('./source.js');
+const say = require('./say.js');
 
 // commands here will be loaded
 const commandsToLoad = [
   sunCalc,
   source,
+  say,
 ];
 
 function loadCommands() {
