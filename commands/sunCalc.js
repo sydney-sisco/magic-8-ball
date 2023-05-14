@@ -1,5 +1,49 @@
 const SunCalc = require('suncalc');
 
+module.exports = [
+  {
+    name: 'moon',
+    prefix: '!moon',
+    execute: async (message, args) => {
+      const moonData = getMoonPhase(message);
+      message.reply(moonData);
+    },
+  },
+  {
+    name: 'sunrise',
+    prefix: '!sunrise',
+    execute: async (message, args) => {
+      const sunData = getSunrise(message);
+      message.reply(sunData);
+    },
+  },
+  {
+    name: 'sunset',
+    prefix: '!sunset',
+    execute: async (message, args) => {
+      const sunData = getSunset(message);
+      message.reply(sunData);
+    },
+  },
+];
+
+const defaultCoords = [
+  process.env.DEFAULT_LAT,
+  process.env.DEFAULT_LON,
+];
+
+function getSunrise(message) {
+  const x = SunCalc.getTimes(new Date(), ...defaultCoords);
+
+  return `${x.sunrise}`;
+}
+
+function getSunset(message) {
+  const x = SunCalc.getTimes(new Date(), ...defaultCoords);
+
+  return `${x.sunset}`;
+}
+
 const getMoonPhase = message => {
   const moonData = SunCalc.getMoonIllumination(new Date());
 
@@ -88,10 +132,6 @@ const findNextPhase = phaseToFind => {
 const getOptions = message => {
   return message.substring(6).split('');
 }
-
-module.exports = {
-  getMoonPhase
-};
 
 // 🌒 Waxing Crescent Moon
 // 🌓 First Quarter Moon

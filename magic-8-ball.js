@@ -15,7 +15,6 @@ const client = new Client({
 });
 
 const didYouMean = require('didyoumean');
-// import pokemonNames from './data/pokemon-list-en.js';
 const pokemonNames = require('./data/pokemon-list-en.js');
 
 // var shortUrl = require('node-url-shortener');
@@ -24,9 +23,6 @@ const PREFIX = '!8';
 
 const wolfram = require('./features/wolfram');
 const WOLFRAM_PREFIX = '!7';
-
-const moon = require('./features/sunCalc');
-const MOON_PREFIX = '!moon';
 
 const weather = require('./features/weather');
 const WEATHER_PREFIX = '!weather';
@@ -42,14 +38,9 @@ const {DUMP_PREFIX, dump} = require('./features/dump.js');
 
 const {DALLE_PREFIX, dalle} = require('./features/dalle.js');
 
-// const voice = require('./features/voice/main.js');
-// voice(client);
+const { loadCommands } = require('./commands/index.js');
+const commands = loadCommands();
 
-// const {log} = require('./features/logging');
-
-// const {setReminder, getReminders} = require('./features/reminders');
-// const { getPreference } = require('./features/userPreferences');
-// const REMINDER_PREFIX = '!r';
 
 const divinations = [
   'It is certain.',
@@ -80,8 +71,6 @@ const scry = () => {
 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
-
-  // getReminders(client);
 });
 
 client.on('messageCreate', async message => {
@@ -90,13 +79,15 @@ client.on('messageCreate', async message => {
     return;
   }
 
-  // collect anonymous metadata about the message
-  // log(message);
+  // load commands from commands/index.js
+  const matchedCommand = [
+    ...commands.values()
+  ].find((command) => message.content.startsWith(command.prefix));
 
-
-  // if(message.content.startsWith(REMINDER_PREFIX)) {
-  //   setReminder(message);
-  // }
+  if (matchedCommand) {
+    const args = message.content.slice(matchedCommand.prefix.length).trim().split(/ +/);
+    matchedCommand.execute(message, args);
+  }
 
   if (message.content.startsWith(DALLE_PREFIX)) {
     message.reply(await dalle(message));
@@ -229,11 +220,11 @@ client.on('messageCreate', async message => {
     .catch(err => message.reply(err.toString()));
   }
 
-  if (message.content.startsWith(MOON_PREFIX)) {
-    const moonData = moon.getMoonPhase(message);
+  // if (message.content.startsWith(MOON_PREFIX)) {
+  //   const moonData = moon.getMoonPhase(message);
 
-    message.reply(moonData);
-  }
+  //   message.reply(moonData);
+  // }
 
   if (message.content.startsWith(WOLFRAM_PREFIX)) {
     wolfram.wolframGetShort(message)
