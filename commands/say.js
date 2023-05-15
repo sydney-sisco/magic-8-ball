@@ -3,10 +3,15 @@ module.exports = [
     name: 'say',
     prefix: '!say',
     execute: async (message, args) => {
-      voice(message);
+      handleUserPrompt(message);
     },
   },
 ];
+
+const eventEmitter = require('../eventEmitter.js');
+eventEmitter.on('response-generated', ({response, message}) => {
+  voice(response, message);
+});
 
 const textToSpeech = require('@google-cloud/text-to-speech');
 const fs = require('fs');
@@ -81,21 +86,32 @@ async function connectToChannel(channel) {
   return connection;
 }
 
-const voice = async (message) => {
+const handleUserPrompt = async (message) => {
 
   const userPromptWithOptions = message.content.slice(VOICE_PREFIX.length).trim();
   const [userPrompt, options] = getOptions(userPromptWithOptions);
 
   console.log('user prompt for voice: ', userPrompt);
+  
+  voice(userPrompt, message);
+};
+
+const voice = async (text, message) => {
+
+  // const userPromptWithOptions = message.content.slice(VOICE_PREFIX.length).trim();
+  // const [userPrompt, options] = getOptions(userPromptWithOptions);
+
+  console.log('user prompt for voice: ', text);
 
   try {
-    const filename = await generateAudio(userPrompt);
+    const filename = await generateAudio(text);
     // Add the generated audio file path to the queue
     audioQueue.push(filename);
   }
   catch (error) {
     console.error(error);
-    return message.reply('Error generating audio: ' + error.message);
+    // return message.reply('Error generating audio: ' + error.message);
+    return;
   }
 
   try {
@@ -104,7 +120,8 @@ const voice = async (message) => {
   }
   catch (error) {
     console.error(error);
-    return message.reply('Error connecting to voice channel: ' + error.message);
+    // return message.reply('Error connecting to voice channel: ' + error.message);
+    return;
   }
 };
 
