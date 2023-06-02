@@ -159,7 +159,7 @@ const gpt3 = async (message) => {
     conversation.clearContextTimestamp();
     return 'Conversation context has been remembered.';
   } else if (userPrompt.startsWith('!help')) {
-    return 'Commands: !set <system message>, !reset, !show';
+    return 'Commands: !set <system message>, !reset, !show, !forget, !remember, !help';
   }
 
   // add the user's message to the conversation

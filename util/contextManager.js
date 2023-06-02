@@ -52,10 +52,19 @@ class ConversationContext {
 
   async loadContextFromFirestore() {
     const channelId = this.channelId;
+
+    // Fetch contextTimestamp from Firestore
+    const docRef = firestore.doc(`channels/${channelId}`);
+    const docSnapshot = await docRef.get();
+    const contextTimestamp = docSnapshot.get('contextTimestamp') || 0;
+
     const channelRef = firestore.collection(`channels/${channelId}/messages`);
-    const snapshot = await channelRef.orderBy('timestamp', 'desc')
+    const snapshot = await channelRef
+      .orderBy('timestamp', 'desc')
+      .where('timestamp', '>', contextTimestamp) // Filter messages by timestamp
       .limit(CONTEXT_MESSAGES_LIMIT)
       .get();
+
     const messages = [];
     snapshot.forEach(doc => {
       const data = {
