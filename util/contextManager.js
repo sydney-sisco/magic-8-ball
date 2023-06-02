@@ -114,6 +114,48 @@ class ConversationContext {
     this.setSystemMessage('');
   }
 
+  // adds a timestamp to channel metadata that indicates the oldest message that should be load loaded into context
+  async setContextTimestamp() {
+    const channelId = this.channelId;
+    const docRef = firestore.doc(`channels/${channelId}`);
+    const docSnapshot = await docRef.get();
+    if (docSnapshot.exists) {
+      const contextTimestamp = docSnapshot.get('contextTimestamp');
+      console.log('Context Timestamp:', contextTimestamp);
+    }
+
+    // Generate current timestamp
+    const timestamp = Date.now();
+
+    // Update context timestamp in Firestore
+    docRef.update({
+      contextTimestamp: timestamp,
+    });
+
+    // Clear context
+    this.context = [];
+  }
+
+  // clears the context timestamp from channel metadata and reloads context from firestore
+  async clearContextTimestamp() {
+    const channelId = this.channelId;
+    const docRef = firestore.doc(`channels/${channelId}`);
+    const docSnapshot = await docRef.get();
+    if (docSnapshot.exists) {
+      const contextTimestamp = docSnapshot.get('contextTimestamp');
+      console.log('Context Timestamp:', contextTimestamp);
+    }
+
+    // Update context timestamp to firestore
+    docRef.update({
+      contextTimestamp: null,
+    });
+
+    // Reload context
+    this.context = await this.loadContextFromFirestore();
+  }
+
+
   addMessage(role, content, originalMessage) {
 
     const messageId = role == 'user' ? originalMessage.id : null;
