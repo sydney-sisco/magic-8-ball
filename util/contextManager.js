@@ -136,10 +136,16 @@ class ConversationContext {
     // Generate current timestamp
     const timestamp = Date.now();
 
-    // Update context timestamp in Firestore
-    docRef.update({
-      contextTimestamp: timestamp,
-    });
+    // Save context timestamp to Firestore
+    if (docSnapshot.exists) {
+      docRef.update({
+        contextTimestamp: timestamp,
+      });
+    } else {
+      docRef.set({
+        contextTimestamp: timestamp,
+      });
+    }
 
     // Clear context
     this.context = [];
@@ -155,10 +161,17 @@ class ConversationContext {
       console.log('Context Timestamp:', contextTimestamp);
     }
 
+
     // Update context timestamp to firestore
-    docRef.update({
-      contextTimestamp: null,
-    });
+    if (docSnapshot.exists) {
+      docRef.update({
+        contextTimestamp: 0,
+      });
+    } else {
+      docRef.set({
+        contextTimestamp: 0,
+      });
+    }
 
     // Reload context
     this.context = await this.loadContextFromFirestore();
