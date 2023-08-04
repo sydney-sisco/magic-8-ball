@@ -254,3 +254,29 @@ client.on('messageCreate', async message => {
 });
 
 client.login(process.env.DISCORD_BOT_TOKEN);
+
+const readline = require('readline');
+
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+rl.on('line', (input) => {
+    console.log(`Received: ${input}`);
+    if (input === "exit") {
+        rl.close();
+    }
+
+    if (input.startsWith('/say')) {
+      const say = input.substring(5);
+      const channel = client.channels.cache.get(process.env.ADMIN_CHANNEL_ID);
+
+      channel.send(`[Admin]: ${say}`);
+    }
+});
+
+rl.on('close', () => {
+    console.log('Exiting command line interface...');
+    process.exit(0);
+});
