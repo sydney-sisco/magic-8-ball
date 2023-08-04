@@ -71,6 +71,9 @@ const scry = () => {
 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
+
+  const channel = client.channels.cache.get(process.env.ADMIN_CHANNEL_ID);
+  channel.send(`[Admin]: Online: ${client.user.tag}`);
 });
 
 client.on('messageCreate', async message => {
@@ -87,6 +90,14 @@ client.on('messageCreate', async message => {
   if (matchedCommand) {
     const args = message.content.slice(matchedCommand.prefix.length).trim().split(/ +/);
     matchedCommand.execute(message, args);
+  }
+
+  if(message.content.startsWith('!restart')) {
+    await message.reply('[System]: Restarting...');
+
+    rl.close();
+    console.log('Restarting bot...');
+    client.destroy();
   }
 
   if (message.content.startsWith(DALLE_PREFIX)) {
@@ -255,6 +266,10 @@ client.on('messageCreate', async message => {
 
 client.login(process.env.DISCORD_BOT_TOKEN);
 
+//
+//// Command line interface
+//
+
 const readline = require('readline');
 
 const rl = readline.createInterface({
@@ -273,6 +288,12 @@ rl.on('line', (input) => {
       const channel = client.channels.cache.get(process.env.ADMIN_CHANNEL_ID);
 
       channel.send(`[Admin]: ${say}`);
+    }
+
+    if (input.startsWith('/restart')) {
+      console.log('Restarting bot...');
+      rl.close();
+      client.destroy();
     }
 });
 
