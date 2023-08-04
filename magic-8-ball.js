@@ -117,7 +117,7 @@ client.on('messageCreate', async message => {
 
     // Wrap the gpt3(message) call inside a Promise
     new Promise(async (resolve) => {
-      const result = await gpt3(message);
+      const result = await gpt3(message, restart);
       resolve(result);
     })
       .then(async (result) => {

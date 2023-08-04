@@ -107,25 +107,20 @@ const hints = [
   // { role: 'assistant', content: 'I am your AI-powered chatbot assistant. How can I help you today?' },
   { role: 'user', content: 'top post on reddit about cats' },
   { role: 'assistant', content: `<<const findHighestCatPost = async () => {const response = await axios.get('https://www.reddit.com/.json');const catPosts = response.data.data.children.filter(post => post.data.title.toLowerCase().includes('cat'));const highestCatPost = catPosts.reduce((highest, post) => post.data.ups > highest.data.ups ? post : highest);return highestCatPost.data.permalink;}findHighestCatPost();>>`}
-  // { role: 'user', content: 'Please reverse the following string: "Hello World!"' },
-  // { role: 'assistant', content: `{{"Hello, World!".split('').reverse().join('');}}` },
-  // { role: 'user', content: `Please sum this array: [1, 2, 3, 4, 5]` },
-  // { role: 'assistant', content: `{{[1, 2, 3, 4, 5].reduce((a, b) => a + b, 0)}}` },
-  // { role: 'user', content: `What's on the front page of reddit right now?` },
-  // { role: 'assistant', content: `{{const { get } = require('axios'); get('https://www.reddit.com/.json').then(res => res.data.data.children[0].data.title)}}` },
-  // { role: 'user', content: `what's the current price of gas in seattle?` },
-  // { role: 'assistant', content: `{{const { get } = require('axios'); get('https://www.gasbuddy.com/home?search=Seattle&fuel=1').then(res => {const regex = /(\$[\d]+\.[\d]+)/; const matched = res.data.match(regex); return matched[0];})}}` },
-  // { role: 'user', content: 'I would like to know the weather in New York.' },
-  // { role: 'assistant', content: '{{wolfram("current weather in New York")}}' },
-  // { role: 'user', content: 'The weather in New York City, United States, currently includes no precipitation with clear skies, a wind speed of 4 meters per second and a temperature of 13 degrees Celsius'},
-  // { role: 'assistant', content: 'The weather in New York City, United States, currently includes no precipitation with clear skies, a wind speed of 4 meters per second and a temperature of 13 degrees Celsius'},
-  // { role: 'user', content: 'how many golf balls would fit inside the earth?'},
-  // { role: 'assistant', content: '{{wolfram("how many golf balls would fit inside the earth?")}}'},
-  // { role: 'user', content: '1.5 times 10 to the 25 to 1.7 times 10 to the 25'},
-  // { role: 'assistant', content: 'The number of golf balls that would fit inside the Earth lies somewhere between 15 and 17 septillion.'},
 ];
 
-const gpt3 = async (message) => {
+const functions = [
+  {
+    name: 'restart',
+    description: 'Restart the robot',
+    parameters: {
+      type: 'object',
+      properties: {},
+    },
+  }
+];
+
+const gpt3 = async (message, restartCB) => {
   const member = message.member;
   const memberId = member.id;
 
@@ -172,6 +167,7 @@ const gpt3 = async (message) => {
     response = await openai.createChatCompletion({
       model: TEXT_MODEL,
       messages: conversation.getContext(), // maybe pass in channel id here?
+      functions: functions,
       // temperature: 0.9,
       // max_tokens: 150,
       // top_p: 1,
@@ -181,7 +177,7 @@ const gpt3 = async (message) => {
     });
 
     if (!response) {
-      return 'API Error';
+      return 'API Error, no response';
     }
 
     console.log('response: ', response);
@@ -189,6 +185,20 @@ const gpt3 = async (message) => {
     if (response.status !== 200) {
       console.log(response.statusText, response.data);
       return 'API Error';
+    }
+
+    // check if GPT wants to call a function
+    if (response.data.choices[0].message.function_call) {
+      const function_call = response.data.choices[0].message.function_call;
+      const function_name = function_call.name;
+      const function_arguments = function_call.arguments;
+
+      console.log('function_call:', function_call);
+
+      if (function_name === 'restart') {
+        restartCB();
+        return;
+      }
     }
 
     let gptMessage = response.data.choices[0].message.content.trim();
@@ -255,5 +265,6 @@ const gpt3 = async (message) => {
 
 module.exports = {
   GPT3_PREFIX,
-  gpt3
+  gpt3,
+  openai, // for testing (is this really how you do it?)
 };
