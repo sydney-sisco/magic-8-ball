@@ -5,6 +5,25 @@ weather.setLang('en');
 // 'metric'  'internal'  'imperial'
 weather.setUnits('metric');
 
+const getWeatherData = location => {
+  weather.setCity(location);
+
+  return new Promise((resolve, reject) => {
+    weather.getSmartJSON((err, smart) => {
+      console.log('weather data:', smart);
+      
+      if(err) reject(err);
+
+      if(!smart) {
+        reject(`Weather data for ${location} not found`);
+        return;
+      }
+  
+      resolve(smart);
+    });
+  });
+}
+
 const getWeather = message => {
   const location = message.content.slice(9); // export const WEATHER_PREFIX = '!weather '; and 9 is the length of '!weather '
   weather.setCity(location);
@@ -96,5 +115,6 @@ const weatherEmojis = {
 }
 
 module.exports = {
-  getWeather
+  getWeather,
+  getWeatherData,
 };

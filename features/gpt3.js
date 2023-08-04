@@ -117,10 +117,22 @@ const functions = [
       type: 'object',
       properties: {},
     },
-  }
+  },
+  {
+    name: 'getWeather',
+    description: 'Get the weather',
+    parameters: {
+      type: 'object',
+      properties: {
+        location: {
+          type: 'string',
+        },
+      },
+    },
+  },
 ];
 
-const gpt3 = async (message, restartCB) => {
+const gpt3 = async (message, restartCB, getWeatherData) => {
   const member = message.member;
   const memberId = member.id;
 
@@ -198,7 +210,38 @@ const gpt3 = async (message, restartCB) => {
       if (function_name === 'restart') {
         restartCB();
         return;
+      } else if (function_name === 'getWeather') {
+        // parse arguments as json
+        const parsedArguments = JSON.parse(function_arguments);
+
+        const location = parsedArguments.location;
+        const weatherData = await getWeatherData(location);
+        
+        console.log('weatherData:', weatherData);
+
+        // add the weather data to the context and get a new response
+        conversation.addMessage('function', JSON.stringify(weatherData), message, 'getWeather');
+        response = await openai.createChatCompletion({
+          model: TEXT_MODEL,
+          messages: conversation.getContext(),
+          functions: functions,
+          user: memberId,
+        });
+
+        if (!response) {
+          return 'API Error, no response';
+        }
+
+        console.log('response: ', response);
+
+        if (response.status !== 200) {
+          console.log(response.statusText, response.data);
+          return 'API Error';
+        }
+
+
       }
+
     }
 
     let gptMessage = response.data.choices[0].message.content.trim();
