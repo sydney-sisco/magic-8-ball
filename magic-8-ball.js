@@ -93,11 +93,8 @@ client.on('messageCreate', async message => {
   }
 
   if(message.content.startsWith('!restart')) {
-    await message.reply('[System]: Restarting...');
-
-    rl.close();
-    console.log('Restarting bot...');
-    client.destroy();
+    
+    restart(message);
   }
 
   if (message.content.startsWith(DALLE_PREFIX)) {
@@ -291,9 +288,7 @@ rl.on('line', (input) => {
     }
 
     if (input.startsWith('/restart')) {
-      console.log('Restarting bot...');
-      rl.close();
-      client.destroy();
+      restart();
     }
 });
 
@@ -301,3 +296,20 @@ rl.on('close', () => {
     console.log('Exiting command line interface...');
     process.exit(0);
 });
+
+const restart = async (message) => {
+
+  const restartMessage = '[System]: Restarting...';
+
+  if (message) {
+    await message.reply(restartMessage);
+  } else {
+
+    const channel = client.channels.cache.get(process.env.ADMIN_CHANNEL_ID);
+    await channel.send(restartMessage);
+  }
+
+  console.log('Restarting bot...');
+  rl.close();
+  client.destroy();
+};
