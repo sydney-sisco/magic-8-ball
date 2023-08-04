@@ -118,16 +118,32 @@ const functions = [
       properties: {},
     },
   },
+  // {
+  //   name: 'getWeather',
+  //   description: 'Get the weather',
+  //   parameters: {
+  //     type: 'object',
+  //     properties: {
+  //       location: {
+  //         type: 'string',
+  //       },
+  //     },
+  //   },
+  // },
   {
-    name: 'getWeather',
-    description: 'Get the weather',
+    name: 'wolphramAlpha',
+    description: 'Use wolfram alpha to get the best answers possible',
     parameters: {
       type: 'object',
       properties: {
-        location: {
+        query: {
           type: 'string',
         },
       },
+    },
+    function: async (query) => {
+      const response = await wolframGetShort({ content: `!7 ${query}`, author: { username: '', discriminator: ''} });
+      return response;
     },
   },
 ];
@@ -238,8 +254,34 @@ const gpt3 = async (message, restartCB, getWeatherData) => {
           console.log(response.statusText, response.data);
           return 'API Error';
         }
+      } else if (function_name === 'wolphramAlpha') {
+        // parse arguments as json
+        const parsedArguments = JSON.parse(function_arguments);
 
+        const query = parsedArguments.query;
+        const wolframAlphaData = await functions.find(f => f.name === 'wolphramAlpha').function(query);
+        
+        console.log('wolframAlphaData:', wolframAlphaData);
 
+        // add the response data to the context and get a new response
+        conversation.addMessage('function', JSON.stringify(wolframAlphaData), message, 'wolphramAlpha');
+        response = await openai.createChatCompletion({
+          model: TEXT_MODEL,
+          messages: conversation.getContext(),
+          functions: functions,
+          user: memberId,
+        });
+
+        if (!response) {
+          return 'API Error, no response';
+        }
+
+        console.log('response: ', response);
+
+        if (response.status !== 200) {
+          console.log(response.statusText, response.data);
+          return 'API Error';
+        }
       }
 
     }
@@ -249,14 +291,14 @@ const gpt3 = async (message, restartCB, getWeatherData) => {
     // messages.push({ role: 'assistant', content: gptMessage });
 
     // if first two characters are << and last two characters are >>, then we have code to execute
-    if (gptMessage.slice(0, 2) === '<<' && gptMessage.slice(-2) === '>>') {
-      const code_to_execute = gptMessage.slice(2, -2);
+    // if (gptMessage.slice(0, 2) === '<<' && gptMessage.slice(-2) === '>>') {
+    //   const code_to_execute = gptMessage.slice(2, -2);
 
-      console.log('Code to execute:', code_to_execute);
+    //   console.log('Code to execute:', code_to_execute);
 
-      const result = await dangerouslyExecuteJS(code_to_execute);
-      gptMessage = await gpt3({ ...message, member: {id: memberId, ...member}, content: `${GPT3_PREFIX} Below is the result of the code execution. Please use it to formulate a response to the user:\n${result}` });
-    }
+    //   const result = await dangerouslyExecuteJS(code_to_execute);
+    //   gptMessage = await gpt3({ ...message, member: {id: memberId, ...member}, content: `${GPT3_PREFIX} Below is the result of the code execution. Please use it to formulate a response to the user:\n${result}` });
+    // }
 
 
     // check for plugin usage
