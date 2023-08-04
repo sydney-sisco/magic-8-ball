@@ -178,7 +178,7 @@ class ConversationContext {
   }
 
 
-  addMessage(role, content, originalMessage) {
+  addMessage(role, content, originalMessage, functionName=null) {
 
     const messageId = role == 'user' ? originalMessage.id : null;
     const member = role == 'user' ? originalMessage.member.id : null;
@@ -191,6 +191,10 @@ class ConversationContext {
       role,
       content,
     };
+
+    if (role === 'function' && functionName) {
+      message.name = functionName;
+    }
     
     this.context.push(message);
     this.#manageContextLength();
