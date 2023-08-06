@@ -1,9 +1,7 @@
 require('dotenv').config()
 
-// const Discord = require("discord.js");
 const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 
-// const client = new Discord.Client();
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -31,8 +29,6 @@ const POKEMON_PREFIX = '!p';
 const {GPT3_PREFIX, gpt3} = require('./features/gpt3');
 
 const {VOICE_PREFIX, voice} = require('./features/voice');
-
-const {DUMP_PREFIX, dump} = require('./features/dump.js');
 
 const {DALLE_PREFIX, dalle} = require('./features/dalle.js');
 
@@ -97,11 +93,6 @@ client.on('messageCreate', async message => {
 
   if (message.content.startsWith(DALLE_PREFIX)) {
     message.reply(await dalle(message));
-  }
-
-  if (message.content.startsWith(DUMP_PREFIX)) {
-    dump(message);
-    return;
   }
 
   if (message.content.startsWith(VOICE_PREFIX)) {

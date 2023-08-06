@@ -1,6 +1,15 @@
 // debug stuff
 
-const DUMP_PREFIX = '!dump';
+module.exports = [
+  {
+    name: 'dump',
+    description: 'print debug stuff',
+    prefix: '!dump',
+    execute: async (message, args) => {
+      dump(message, args);
+    }
+  },
+];
 
 // format as markdown for discord
 function objectToMarkdown(obj) {
@@ -18,7 +27,7 @@ function objectToMarkdown(obj) {
 }
 
 // print debug info to console and discord
-const dump = function (message) {
+const dump = function (message, args) {
 
   // Check if the message is sent in a thread
   let thread = null;
@@ -43,11 +52,8 @@ const dump = function (message) {
     author: message.author,
   }
 
-  console.log(`dump: ${JSON.stringify(msg)}`);
+  console.log(`dump:`);
+  console.dir(msg, { depth: null, colors: true });
   message.reply(`dump: ${objectToMarkdown(msg)}`);
 };
 
-module.exports = {
-  DUMP_PREFIX,
-  dump
-};
