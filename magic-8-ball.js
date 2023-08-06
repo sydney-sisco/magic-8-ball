@@ -17,9 +17,6 @@ const pokemonNames = require('./data/pokemon-list-en.js');
 
 const PREFIX = '!8';
 
-const wolfram = require('./features/wolfram');
-const WOLFRAM_PREFIX = '!7';
-
 const weather = require('./features/weather');
 const WEATHER_PREFIX = '!weather';
 
@@ -74,7 +71,11 @@ client.on('messageCreate', async message => {
     return;
   }
 
-  // load commands from commands/index.js
+  if(message.content.startsWith('!restart')) {
+    restart(message);
+  }
+
+  // load addional commands from commands/index.js
   const matchedCommand = [
     ...commands.values()
   ].find((command) => message.content.startsWith(command.prefix));
@@ -82,11 +83,6 @@ client.on('messageCreate', async message => {
   if (matchedCommand) {
     const args = message.content.slice(matchedCommand.prefix.length).trim().split(/ +/);
     matchedCommand.execute(message, args);
-  }
-
-  if(message.content.startsWith('!restart')) {
-    
-    restart(message);
   }
 
   if (message.content.startsWith(VOICE_PREFIX)) {
@@ -209,26 +205,6 @@ client.on('messageCreate', async message => {
     const weatherData = weather.getWeather(message)
     .then(data => message.reply(data))
     .catch(err => message.reply(err.toString()));
-  }
-
-  if (message.content.startsWith(WOLFRAM_PREFIX)) {
-    wolfram.wolframGetShort(message)
-    .then(res => {
-      // console.log('res:', res);
-
-      // const url = `https://www.wolframalpha.com/input/?i=${encodeURI(message.content.substring(3))}`;
-      
-      // shortUrl.short(url, function(err, url){
-      //   console.log(url);
-      //   message.reply(`${res}\nSee more: ${url}`)
-      // });
-      message.reply(res)
-    })
-    .catch(err => {
-      message.reply(err.toString())
-    })
-    .catch(err => console.log('what?',err))
-    return;
   }
 
   if (message.content.startsWith(PREFIX)) {

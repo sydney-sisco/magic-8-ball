@@ -15,6 +15,7 @@ const sunCalc = require('./sunCalc.js');
 const source = require('./source.js');
 const dump = require('./dump.js');
 const dalle = require('./dalle.js');
+const wolfram = require('./wolfram.js');
 
 // commands here will be loaded
 const commandsToLoad = [
@@ -22,6 +23,7 @@ const commandsToLoad = [
   source,
   dump,
   dalle,
+  wolfram,
 ];
 
 function loadCommands() {
