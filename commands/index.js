@@ -14,12 +14,14 @@
 const sunCalc = require('./sunCalc.js');
 const source = require('./source.js');
 const dump = require('./dump.js');
+const dalle = require('./dalle.js');
 
 // commands here will be loaded
 const commandsToLoad = [
   sunCalc,
   source,
   dump,
+  dalle,
 ];
 
 function loadCommands() {

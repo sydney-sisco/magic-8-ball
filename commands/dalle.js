@@ -1,3 +1,16 @@
+module.exports = [
+  {
+    name: 'dalle',
+    prefix: '!i',
+    execute: async (message, args) => {
+      // const dalle = require('../commands/dalle.js');
+      const response = await dalle(message);
+      message.reply(response);
+    },
+  },
+]
+
+
 var axios = require('axios');
 const { EmbedBuilder } = require('discord.js');
 const { Configuration, OpenAIApi } = require("openai");
@@ -88,8 +101,3 @@ const invokeSaveFunction = async (url, prompt, member) => {
     return `Error saving image: ${e.message}`;
   }
 }
-
-module.exports = {
-  DALLE_PREFIX,
-  dalle,
-};

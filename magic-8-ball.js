@@ -30,8 +30,6 @@ const {GPT3_PREFIX, gpt3} = require('./features/gpt3');
 
 const {VOICE_PREFIX, voice} = require('./features/voice');
 
-const {DALLE_PREFIX, dalle} = require('./features/dalle.js');
-
 const { loadCommands } = require('./commands/index.js');
 const commands = loadCommands();
 
@@ -89,10 +87,6 @@ client.on('messageCreate', async message => {
   if(message.content.startsWith('!restart')) {
     
     restart(message);
-  }
-
-  if (message.content.startsWith(DALLE_PREFIX)) {
-    message.reply(await dalle(message));
   }
 
   if (message.content.startsWith(VOICE_PREFIX)) {
