@@ -217,12 +217,6 @@ client.on('messageCreate', async message => {
     .catch(err => message.reply(err.toString()));
   }
 
-  // if (message.content.startsWith(MOON_PREFIX)) {
-  //   const moonData = moon.getMoonPhase(message);
-
-  //   message.reply(moonData);
-  // }
-
   if (message.content.startsWith(WOLFRAM_PREFIX)) {
     wolfram.wolframGetShort(message)
     .then(res => {
