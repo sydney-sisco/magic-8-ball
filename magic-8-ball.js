@@ -17,8 +17,6 @@ const client = new Client({
 const didYouMean = require('didyoumean');
 const pokemonNames = require('./data/pokemon-list-en.js');
 
-// var shortUrl = require('node-url-shortener');
-
 const PREFIX = '!8';
 
 const wolfram = require('./features/wolfram');
