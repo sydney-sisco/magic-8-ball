@@ -27,8 +27,7 @@
     "openai": "^3.2.1",
     "openweather-apis": "^4.4.1",
     "pokemon.js": "^1.1.8",
-    "suncalc": "^1.8.0",
-    "wolfram-alpha-api": "https://products.wolframalpha.com/api/libraries/javascript/wolfram-alpha-api-1.0.0-rc.1.tgz"
+    "suncalc": "^1.8.0"
   },
   "devDependencies": {
     "jest": "^27.5.1",

@@ -40,3 +40,11 @@ To run:
 We now have test! To run them, use
 
 `npm run test`
+
+### What does it take to get this thing running?
+
+create .env at root of repo
+
+copy the contents from password manager
+
+copy gcp.json from password manager

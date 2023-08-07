@@ -1,3 +1,16 @@
+
+module.exports = [
+  {
+    name: 'voice',
+    description: 'text to speech',
+    prefix: '!say',
+    execute: async (message, args, context) => {
+      voice(message);
+    },
+  }
+]
+
+
 const textToSpeech = require('@google-cloud/text-to-speech');
 const fs = require('fs');
 const util = require('util');
@@ -114,8 +127,3 @@ async function playAudio(connection) {
     });
   }
 }
-
-module.exports = {
-  VOICE_PREFIX,
-  voice
-};
