@@ -9,7 +9,7 @@ const openai = new OpenAIApi(configuration);
 
 const { getOptions } = require('../util/shared-helpers.js');
 // const { dangerouslyExecuteJS } = require('../util/dangerously-execute-code.js');
-const {fetchRedditFirstPage} = require('../util/fetch-reddit-first-page.js');
+// const {fetchRedditFirstPage} = require('../util/fetch-reddit-first-page.js');
 
 const GPT3_PREFIX = '!!';
 
