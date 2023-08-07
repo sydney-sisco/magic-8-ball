@@ -17,9 +17,6 @@ const pokemonNames = require('./data/pokemon-list-en.js');
 
 const PREFIX = '!8';
 
-// const weather = require('./features/weather');
-// const WEATHER_PREFIX = '!weather';
-
 const Pokemon = require('pokemon.js');
 const POKEMON_PREFIX = '!p';
 
@@ -200,12 +197,6 @@ client.on('messageCreate', async message => {
     }
     );
   }
-
-  // if (message.content.startsWith(WEATHER_PREFIX)) {
-  //   const weatherData = weather.getWeather(message)
-  //   .then(data => message.reply(data))
-  //   .catch(err => message.reply(err.toString()));
-  // }
 
   if (message.content.startsWith(PREFIX)) {
     message.reply(`🎱 ${scry()} 🎱`);
