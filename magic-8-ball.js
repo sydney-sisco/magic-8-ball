@@ -12,13 +12,12 @@ const client = new Client({
   ],
 });
 
-const PREFIX = '!8';
 
-const {GPT3_PREFIX, gpt3} = require('./features/gpt3');
-
+// load additional commands
 const { loadCommands } = require('./commands/index.js');
 const commands = loadCommands();
 
+const PREFIX = '!8';
 
 const divinations = [
   'It is certain.',
@@ -64,59 +63,25 @@ client.on('messageCreate', async message => {
     restart(message);
   }
 
-  // load addional commands from commands/index.js
+  // check if message starts with a command prefix
   const matchedCommand = [
     ...commands.values()
   ].find((command) => message.content.startsWith(command.prefix));
 
+  // if a command is matched, execute it
   if (matchedCommand) {
     const args = message.content.slice(matchedCommand.prefix.length).trim().split(/ +/);
     matchedCommand.execute(message, args);
-  }
-
-  if (message.content.startsWith(GPT3_PREFIX)) {
-
-    message.channel.sendTyping()
-    const intervalId = setInterval(() => { message.channel.sendTyping() }, 5000);
-
-    // Wrap the gpt3(message) call inside a Promise
-    new Promise(async (resolve) => {
-      const result = await gpt3(message, restart);
-      resolve(result);
-    })
-      .then(async (result) => {
-        if (!result) {
-          return;
-        }
-
-        // If result is an array, send each item as a separate message
-        if (Array.isArray(result)) {
-          result.forEach(async (item) => {
-            const response = await message.reply(item);
-            response.react('❤️');
-            response.react('👎');
-          });
-          return;
-        }
-
-        const response = await message.reply(result);
-        response.react('❤️');
-        response.react('👎');
-      })
-      .finally(() => {
-        // Clear the interval after processing the response
-        clearInterval(intervalId);
-      });
   }
 
   if (message.content.startsWith(PREFIX)) {
     message.reply(`🎱 ${scry()} 🎱`);
     return;
   }
-
 });
 
 client.login(process.env.DISCORD_BOT_TOKEN);
+
 
 //
 //// Command line interface

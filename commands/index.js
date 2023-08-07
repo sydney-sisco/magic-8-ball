@@ -19,6 +19,7 @@ const wolfram = require('./wolfram.js');
 const weather = require('./weather.js');
 const pokemon = require('./pokemon.js');
 const say = require('./text-to-speech.js');
+const chat = require('./chat.js');
 
 // commands here will be loaded
 const commandsToLoad = [
@@ -30,6 +31,7 @@ const commandsToLoad = [
   weather,
   pokemon,
   say,
+  chat,
 ];
 
 function loadCommands() {
