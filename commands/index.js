@@ -20,6 +20,7 @@ const weather = require('./weather.js');
 const pokemon = require('./pokemon.js');
 const say = require('./text-to-speech.js');
 const chat = require('./chat.js');
+const reddit = require('./reddit.js');
 
 // commands here will be loaded
 const commandsToLoad = [
@@ -32,6 +33,7 @@ const commandsToLoad = [
   pokemon,
   say,
   chat,
+  reddit,
 ];
 
 function loadCommands() {
