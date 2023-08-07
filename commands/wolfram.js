@@ -1,9 +1,9 @@
 module.exports = [
   {
     name: 'wolfram',
-    description: 'wolfram alpha query (getShort)',
+    description: 'query wolframalpha (getShort)',
     prefix: '!7',
-    execute: async (message, args) => {
+    execute: async (message, commands, args) => {
       const result = await wolframGetShort(message);
       message.reply(result);
     },
@@ -12,7 +12,7 @@ module.exports = [
   //   name: 'wolframfull',
   //   description: 'wolfram alpha query (getFull)',
   //   prefix: '!wolframfull',
-  //   execute: async (message, args) => {
+  //   execute: async (message, commands, args) => {
   //     const result = await wolframGetFull(message);
   //     message.reply(result);
   //   },

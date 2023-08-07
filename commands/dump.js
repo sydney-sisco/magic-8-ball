@@ -5,7 +5,7 @@ module.exports = [
     name: 'dump',
     description: 'print debug stuff',
     prefix: '!dump',
-    execute: async (message, args) => {
+    execute: async (message, commands, args) => {
       dump(message, args);
     }
   },

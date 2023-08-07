@@ -2,7 +2,8 @@ module.exports = [
   {
     name: 'chat',
     prefix: '!!',
-    execute: async (message, args) => {
+    description: 'Chat with the bot',
+    execute: async (message, commands, args) => {
       chat(message);
     },
   },

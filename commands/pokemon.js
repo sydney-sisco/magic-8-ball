@@ -2,7 +2,8 @@ module.exports = [
   {
     name: 'pokemon',
     prefix: '!p',
-    execute: async (message, args) => {
+    description: 'Get information about a pokemon',
+    execute: async (message, commands, args) => {
       await pokemon(message);
     },
   },

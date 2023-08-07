@@ -71,7 +71,7 @@ client.on('messageCreate', async message => {
   // if a command is matched, execute it
   if (matchedCommand) {
     const args = message.content.slice(matchedCommand.prefix.length).trim().split(/ +/);
-    matchedCommand.execute(message, args);
+    matchedCommand.execute(message, commands, args);
   }
 
   if (message.content.startsWith(PREFIX)) {

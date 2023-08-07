@@ -11,29 +11,31 @@
 // }
 
 
-const sunCalc = require('./sunCalc.js');
+const help = require('./help.js');
 const source = require('./source.js');
 const dump = require('./dump.js');
-const dalle = require('./dalle.js');
-const wolfram = require('./wolfram.js');
+const sunCalc = require('./sunCalc.js');
 const weather = require('./weather.js');
 const pokemon = require('./pokemon.js');
-const say = require('./text-to-speech.js');
-const chat = require('./chat.js');
 const reddit = require('./reddit.js');
+const wolfram = require('./wolfram.js');
+const say = require('./text-to-speech.js');
+const dalle = require('./dalle.js');
+const chat = require('./chat.js');
 
 // commands here will be loaded
 const commandsToLoad = [
-  sunCalc,
+  help,
   source,
   dump,
-  dalle,
-  wolfram,
+  sunCalc,
   weather,
   pokemon,
-  say,
-  chat,
   reddit,
+  wolfram,
+  say,
+  dalle,
+  chat,
 ];
 
 function loadCommands() {

@@ -2,7 +2,8 @@ module.exports = [
   {
     name: 'weather',
     prefix: '!weather',
-    execute: async (message, args) => {
+    description: 'Get the current weather for a location',
+    execute: async (message, commands, args) => {
       const response = await getWeather(message);
       message.reply(response);
     },
