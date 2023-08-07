@@ -18,6 +18,7 @@ const dalle = require('./dalle.js');
 const wolfram = require('./wolfram.js');
 const weather = require('./weather.js');
 const pokemon = require('./pokemon.js');
+const say = require('./text-to-speech.js');
 
 // commands here will be loaded
 const commandsToLoad = [
@@ -28,6 +29,7 @@ const commandsToLoad = [
   wolfram,
   weather,
   pokemon,
+  say,
 ];
 
 function loadCommands() {

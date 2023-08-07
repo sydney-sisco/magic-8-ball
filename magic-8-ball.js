@@ -16,8 +16,6 @@ const PREFIX = '!8';
 
 const {GPT3_PREFIX, gpt3} = require('./features/gpt3');
 
-const {VOICE_PREFIX, voice} = require('./features/voice');
-
 const { loadCommands } = require('./commands/index.js');
 const commands = loadCommands();
 
@@ -74,10 +72,6 @@ client.on('messageCreate', async message => {
   if (matchedCommand) {
     const args = message.content.slice(matchedCommand.prefix.length).trim().split(/ +/);
     matchedCommand.execute(message, args);
-  }
-
-  if (message.content.startsWith(VOICE_PREFIX)) {
-    voice(message);
   }
 
   if (message.content.startsWith(GPT3_PREFIX)) {
