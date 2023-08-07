@@ -34,4 +34,6 @@ module.exports = function commandLineInterface(client) {
       console.log('Exiting command line interface...');
       process.exit(0);
   });
+
+  return rl;
 };

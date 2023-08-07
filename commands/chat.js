@@ -4,7 +4,7 @@ module.exports = [
     prefix: '!!',
     description: 'Chat with the bot',
     execute: async (message, args, context) => {
-      chat(message);
+      chat(message, args, context);
     },
   },
 ]
@@ -12,13 +12,13 @@ module.exports = [
 const { gpt3 } = require('../features/gpt3');
 
 
-const chat = (message) => {
+const chat = (message, args, context) => {
   message.channel.sendTyping()
   const intervalId = setInterval(() => { message.channel.sendTyping() }, 5000);
 
   // Wrap the gpt3(message) call inside a Promise
   new Promise(async (resolve) => {
-    const result = await gpt3(message);
+    const result = await gpt3(message, args, context);
     resolve(result);
   })
     .then(async (result) => {

@@ -110,7 +110,10 @@ const hints = [
   { role: 'assistant', content: `<<const findHighestCatPost = async () => {const response = await axios.get('https://www.reddit.com/.json');const catPosts = response.data.data.children.filter(post => post.data.title.toLowerCase().includes('cat'));const highestCatPost = catPosts.reduce((highest, post) => post.data.ups > highest.data.ups ? post : highest);return highestCatPost.data.permalink;}findHighestCatPost();>>`}
 ];
 
-const functions = [
+const restart = require('../commands/restart.js');
+
+
+// const functions = [
   // {
   //   name: 'restart',
   //   description: 'Restart the robot',
@@ -156,12 +159,24 @@ const functions = [
   //   },
   //   function: fetchRedditFirstPage,
   // },
-];
+// ];
 
 // const gpt3 = async (message, restartCB) => {
-const gpt3 = async (message) => {
+const gpt3 = async (message, args, {client, rl}) => {
   const member = message.member;
   const memberId = member.id;
+
+  const functions = [
+    {
+      name: 'restart',
+      description: 'Restart the robot',
+      parameters: {
+        type: 'object',
+        properties: {},
+      },
+      function: () => {restart[0].execute(null, null, {client, rl})},
+    },
+  ];
 
   const userPromptWithOptions = message.content.slice(GPT3_PREFIX.length).trim();
 
@@ -229,7 +244,7 @@ const gpt3 = async (message) => {
     // check if GPT wants to call a function
     if (response.data.choices[0].message.function_call) {
       const function_call = response.data.choices[0].message.function_call;
-      handleFunctionCall(function_call, message, member, memberId);
+      handleFunctionCall(function_call, message, member, memberId, functions);
       return `Function call handled: ${function_call.name}, ${function_call.parameters}`;
     } else {
       let gptMessage = response.data.choices[0].message.content.trim();
@@ -295,7 +310,7 @@ const gpt3 = async (message) => {
 
 }
 
-const handleFunctionCall = async (function_call, message, member, memberId) => {
+const handleFunctionCall = async (function_call, message, member, memberId, functions) => {
   
   console.log('function_call:', function_call);
   const function_name = function_call.name;

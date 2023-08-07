@@ -12,6 +12,10 @@ const client = new Client({
   ],
 });
 
+
+// load command line interface
+rl = require('./features/command-line-interface.js')(client);
+
 // load additional commands
 const { loadCommands } = require('./commands/index.js');
 const commands = loadCommands();
@@ -76,6 +80,3 @@ client.on('messageCreate', async message => {
 });
 
 client.login(process.env.DISCORD_BOT_TOKEN);
-
-// load command line interface
-require('./features/command-line-interface.js')(client);
