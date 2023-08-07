@@ -17,6 +17,7 @@ const dump = require('./dump.js');
 const dalle = require('./dalle.js');
 const wolfram = require('./wolfram.js');
 const weather = require('./weather.js');
+const pokemon = require('./pokemon.js');
 
 // commands here will be loaded
 const commandsToLoad = [
@@ -26,6 +27,7 @@ const commandsToLoad = [
   dalle,
   wolfram,
   weather,
+  pokemon,
 ];
 
 function loadCommands() {
