@@ -17,8 +17,8 @@ const pokemonNames = require('./data/pokemon-list-en.js');
 
 const PREFIX = '!8';
 
-const weather = require('./features/weather');
-const WEATHER_PREFIX = '!weather';
+// const weather = require('./features/weather');
+// const WEATHER_PREFIX = '!weather';
 
 const Pokemon = require('pokemon.js');
 const POKEMON_PREFIX = '!p';
@@ -96,7 +96,7 @@ client.on('messageCreate', async message => {
 
     // Wrap the gpt3(message) call inside a Promise
     new Promise(async (resolve) => {
-      const result = await gpt3(message, restart, weather.getWeatherData);
+      const result = await gpt3(message, restart);
       resolve(result);
     })
       .then(async (result) => {
@@ -201,11 +201,11 @@ client.on('messageCreate', async message => {
     );
   }
 
-  if (message.content.startsWith(WEATHER_PREFIX)) {
-    const weatherData = weather.getWeather(message)
-    .then(data => message.reply(data))
-    .catch(err => message.reply(err.toString()));
-  }
+  // if (message.content.startsWith(WEATHER_PREFIX)) {
+  //   const weatherData = weather.getWeather(message)
+  //   .then(data => message.reply(data))
+  //   .catch(err => message.reply(err.toString()));
+  // }
 
   if (message.content.startsWith(PREFIX)) {
     message.reply(`🎱 ${scry()} 🎱`);

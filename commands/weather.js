@@ -1,6 +1,16 @@
+module.exports = [
+  {
+    name: 'weather',
+    prefix: '!weather',
+    execute: async (message, args) => {
+      const response = await getWeather(message);
+      message.reply(response);
+    },
+  },
+];
+
 var weather = require('openweather-apis');
 weather.setAPPID(process.env.OPEN_WEATHER_MAP);
-// console.log('API KEY:', process.env.OPEN_WEATHER_MAP);
 weather.setLang('en');
 // 'metric'  'internal'  'imperial'
 weather.setUnits('metric');
@@ -113,8 +123,3 @@ const weatherEmojis = {
   803: '🌥️',
   804: '☁️',
 }
-
-module.exports = {
-  getWeather,
-  getWeatherData,
-};

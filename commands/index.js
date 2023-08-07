@@ -16,6 +16,7 @@ const source = require('./source.js');
 const dump = require('./dump.js');
 const dalle = require('./dalle.js');
 const wolfram = require('./wolfram.js');
+const weather = require('./weather.js');
 
 // commands here will be loaded
 const commandsToLoad = [
@@ -24,6 +25,7 @@ const commandsToLoad = [
   dump,
   dalle,
   wolfram,
+  weather,
 ];
 
 function loadCommands() {
