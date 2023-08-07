@@ -5,7 +5,7 @@ module.exports = [
     name: 'moon',
     prefix: '!moon',
     description: 'Get the current moon phase',
-    execute: async (message, commands, args) => {
+    execute: async (message, args, context) => {
       const moonData = getMoonPhase(message);
       message.reply(moonData);
     },
@@ -14,7 +14,7 @@ module.exports = [
     name: 'sunrise',
     prefix: '!sunrise',
     description: 'Get today\'s sunrise time',
-    execute: async (message, commands, args) => {
+    execute: async (message, args, context) => {
       const sunData = getSunrise(message);
       message.reply(sunData);
     },
@@ -23,7 +23,7 @@ module.exports = [
     name: 'sunset',
     prefix: '!sunset',
     description: 'Get today\'s sunset time',
-    execute: async (message, commands, args) => {
+    execute: async (message, args, context) => {
       const sunData = getSunset(message);
       message.reply(sunData);
     },

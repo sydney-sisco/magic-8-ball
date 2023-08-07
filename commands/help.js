@@ -4,7 +4,9 @@ module.exports =[{
   name: 'help',
   description: 'List all commands',
   prefix: '!help',
-  execute: (message, commands, args) => {
+  execute: (message, args, context) => {
+    const { commands } = context;
+    
     let reply = 'Here are the available commands:\n';
 
     for (const [ ,cmd] of commands) {

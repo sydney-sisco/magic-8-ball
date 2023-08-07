@@ -3,7 +3,7 @@ module.exports = [
     name: 'dalle',
     prefix: '!i',
     description: 'Create an image from text',
-    execute: async (message, commands, args) => {
+    execute: async (message, args, context) => {
       const response = await dalle(message);
       message.reply(response);
     },

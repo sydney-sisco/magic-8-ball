@@ -3,7 +3,7 @@ module.exports = [
     name: 'wolfram',
     description: 'query wolframalpha (getShort)',
     prefix: '!7',
-    execute: async (message, commands, args) => {
+    execute: async (message, args, context) => {
       const result = await wolframGetShort(message);
       message.reply(result);
     },
@@ -12,7 +12,7 @@ module.exports = [
   //   name: 'wolframfull',
   //   description: 'wolfram alpha query (getFull)',
   //   prefix: '!wolframfull',
-  //   execute: async (message, commands, args) => {
+  //   execute: async (message, args, context) => {
   //     const result = await wolframGetFull(message);
   //     message.reply(result);
   //   },
@@ -30,7 +30,7 @@ const addLinkToResult = queryString => {
 }
 
 const wolframGetShort = async function(message) {
-  const queryString = message.content.substring(13);
+  const queryString = message.content.substring(3);
 
   const userPreferences = preferences.getPreference(`${message.author.username}#${message.author.discriminator}`);
   // console.log('got:', userPreferences);

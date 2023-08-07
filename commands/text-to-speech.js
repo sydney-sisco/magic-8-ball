@@ -4,7 +4,7 @@ module.exports = [
     name: 'voice',
     description: 'text to speech',
     prefix: '!say',
-    execute: async (message, commands, args) => {
+    execute: async (message, args, context) => {
       voice(message);
     },
   }

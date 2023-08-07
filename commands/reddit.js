@@ -3,7 +3,7 @@ module.exports = [
     name: 'reddit',
     prefix: '!reddit',
     description: 'Fetches the first page of Reddit',
-    execute: async (message, commands, args) => {
+    execute: async (message, args, context) => {
       const postTitles = await fetchRedditFirstPage();
       message.channel.send(postTitles);
     },

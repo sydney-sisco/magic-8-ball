@@ -14,6 +14,7 @@
 const help = require('./help.js');
 const source = require('./source.js');
 const dump = require('./dump.js');
+const restart = require('./restart.js');
 const sunCalc = require('./sunCalc.js');
 const weather = require('./weather.js');
 const pokemon = require('./pokemon.js');
@@ -28,6 +29,7 @@ const commandsToLoad = [
   help,
   source,
   dump,
+  restart,
   sunCalc,
   weather,
   pokemon,
