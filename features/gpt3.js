@@ -55,7 +55,7 @@ const restart = require('../commands/restart.js');
 const { loadFunctions } = require('../functions/index.js');
 const functions = loadFunctions();
 
-const gpt3 = async (message) => {
+const gpt3 = async (message, args, sysContext) => {
   const member = message.member;
   const memberId = member.id;
 
@@ -105,7 +105,7 @@ const gpt3 = async (message) => {
     // check if GPT wants to call a function
     while (response.data.choices[0].message.function_call) {
       const function_call = response.data.choices[0].message.function_call;
-      const {function_name, functionResponse} = await handleFunctionCall(function_call, message, member, memberId, functions);
+      const {function_name, functionResponse} = await handleFunctionCall(function_call, functions, args, {...sysContext, message});
 
       conversation.addMessage('function', functionResponse, message, function_name);
 
@@ -184,7 +184,7 @@ const createChatCompletion = async (messages, functions, memberId) => {
   });
 }
 
-const handleFunctionCall = async (function_call, message, member, memberId, functions) => {
+const handleFunctionCall = async (function_call, functions, args, context) => {
   
   console.log('function_call:', function_call);
   const function_name = function_call.name;
@@ -196,7 +196,7 @@ const handleFunctionCall = async (function_call, message, member, memberId, func
     const functionObject = functions.find(f => f.name === function_name);
 
     console.log('functionObject:', functionObject);
-    let functionResponse = await functionObject.execute(function_arguments);
+    let functionResponse = await functionObject.execute(function_arguments, args, context);
     
     console.log('functionResponse:', functionResponse);
 

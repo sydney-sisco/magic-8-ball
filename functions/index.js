@@ -3,8 +3,10 @@
 // function execution
 
 const reddit = require('./reddit.js');
+const restart = require('./restart.js');
 
 const functionsToLoad = [
+  ...restart,
   ...reddit,
 ];
 
