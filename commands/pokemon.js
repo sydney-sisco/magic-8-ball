@@ -1,23 +1,21 @@
+const pokemonFn = require('../functions/pokemon.js');
+
 module.exports = [
   {
-    name: 'pokemon',
-    prefix: '!p',
-    description: 'Get information about a pokemon',
+    ...pokemonFn[0],
     execute: async (message, args, context) => {
-      await pokemon(message);
+      await pokemonCommand(message);
     },
   },
 ];
 
-const Pokemon = require('pokemon.js');
 const POKEMON_PREFIX = '!p';
 const didYouMean = require('didyoumean');
 const pokemonNames = require('../data/pokemon-list-en.js');
 const { EmbedBuilder } = require('discord.js');
 
-const pokemon = async (message) => {
+const pokemonCommand = async (message) => {
   var pokemon = message.content.substring(POKEMON_PREFIX.length + 1);
-  Pokemon.setLanguage('english');
 
   // this used to work now it crashes. Since missingno is a glitch anyway, I'm going to leave it.
   if (pokemon.toLowerCase() === 'missingno') {
@@ -62,23 +60,23 @@ const pokemon = async (message) => {
     return;
   }
   
-  Pokemon.getPokemon(pokemon)
+  pokemonFn[0].execute({pokemon: pokemon})
   .then(res => {
+    console.log(res);
     if (res) {
-      const stats = Object.keys(res.stats);
-
       const embed = new EmbedBuilder()
       .setColor('#0099ff')
       .setTitle(`#${res.id} **${res.name}**`)
       .setDescription(`${res.genera}
-      Type: ${res.types.map(type => type.name).join(', ')}`)
-      .setImage(res.sprites.front_default)
+      Type: ${res.types.join(', ')}`)
+      .setImage(res.sprite)
 
       message.reply({ embeds: [embed] } );
     } else {
       const potentialMatch = didYouMean(pokemon, pokemonNames);
 
       if (!potentialMatch) {
+        message.reply(`Pokémon ${pokemon} not found`);
         return;
       }
 
@@ -88,6 +86,5 @@ const pokemon = async (message) => {
   .catch(err => { 
     console.log(err);
     message.reply(`${err}`);
-  }
-  );
+  });
 };

@@ -1,4 +1,3 @@
-var fs = require('fs');
 const TEXT_MODEL = process.env.OPENAI_TEXT_MODEL || 'text-ada-001';
 
 const { Configuration, OpenAIApi } = require("openai");
@@ -49,8 +48,6 @@ const systemMessages = [
   },
 ];
 
-const restart = require('../commands/restart.js');
-
 // load functions
 const { loadFunctions } = require('../functions/index.js');
 const functions = loadFunctions();
@@ -81,7 +78,7 @@ const gpt3 = async (message, args, sysContext) => {
   // add the user's message to the conversation
   conversation.addMessage('user', userPrompt, message);
 
-  const functionsToSend = functions.length ? functions.map(({execute, ...rest}) => rest) : undefined
+  const functionsToSend = functions.length ? functions.map(({execute, prefix, ...rest}) => rest) : undefined
 
   console.log('sending context: ', conversation.getContext());
   console.log('sending functions: ', functionsToSend);
@@ -195,7 +192,7 @@ const handleFunctionCall = async (function_call, functions, context) => {
     const functionObject = functions.find(f => f.name === function_name);
 
     console.log('functionObject:', functionObject);
-    let functionResponse = await functionObject.execute(function_arguments, context);
+    let functionResponse = await functionObject.execute(JSON.parse(function_arguments), context);
     
     console.log('functionResponse:', functionResponse);
 

@@ -4,10 +4,12 @@
 
 const reddit = require('./reddit.js');
 const restart = require('./restart.js');
+const pokemon = require('./pokemon.js');
 
 const functionsToLoad = [
   ...restart,
   ...reddit,
+  ...pokemon,
 ];
 
 function loadFunctions() {
