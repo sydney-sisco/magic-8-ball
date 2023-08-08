@@ -1,13 +1,13 @@
 module.exports = [
   {
     name: 'restart',
-    // prefix: '!restart',
+    prefix: '!restart',
     description: 'Restart the bot and download the latest updates',
     parameters: {
       type: 'object',
       properties: {},
     },
-    execute: async (fnargs, args, context) => {
+    execute: async (args, context) => {
       const { client, rl, message } = context;
       await restart(message, client, rl);
     },

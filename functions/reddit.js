@@ -6,7 +6,7 @@ module.exports = [
       type: 'object',
       properties: {},
     },
-    execute: async (message, args, context) => {
+    execute: async (args, context) => {
       const postTitles = await fetchRedditFirstPage();
       return postTitles;
     },

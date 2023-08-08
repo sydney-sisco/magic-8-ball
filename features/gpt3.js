@@ -105,14 +105,13 @@ const gpt3 = async (message, args, sysContext) => {
     // check if GPT wants to call a function
     while (response.data.choices[0].message.function_call) {
       const function_call = response.data.choices[0].message.function_call;
-      const {function_name, functionResponse} = await handleFunctionCall(function_call, functions, args, {...sysContext, message});
+      const {function_name, functionResponse} = await handleFunctionCall(function_call, functions, {...sysContext, message});
 
       conversation.addMessage('function', functionResponse, message, function_name);
 
       // send results back to model
       response = await createChatCompletion(conversation.getContext(), functionsToSend, memberId)
       console.log('response status: ', response.status, 'statusText: ', response.statusText, 'config data: ',response.config.data, 'response.data: ', response.data);
-      
     }
       
     let gptMessage = response.data.choices[0].message.content.trim();
@@ -184,7 +183,7 @@ const createChatCompletion = async (messages, functions, memberId) => {
   });
 }
 
-const handleFunctionCall = async (function_call, functions, args, context) => {
+const handleFunctionCall = async (function_call, functions, context) => {
   
   console.log('function_call:', function_call);
   const function_name = function_call.name;
@@ -196,7 +195,7 @@ const handleFunctionCall = async (function_call, functions, args, context) => {
     const functionObject = functions.find(f => f.name === function_name);
 
     console.log('functionObject:', functionObject);
-    let functionResponse = await functionObject.execute(function_arguments, args, context);
+    let functionResponse = await functionObject.execute(function_arguments, context);
     
     console.log('functionResponse:', functionResponse);
 
