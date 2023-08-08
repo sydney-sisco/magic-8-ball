@@ -71,6 +71,11 @@ class ConversationContext {
         role: doc.get('role'),
         content: doc.get('message'),
       };
+
+      if (doc.get('name')) {
+        data.name = doc.get('name');
+      }
+
       messages.push(data);
     });
 
@@ -192,8 +197,18 @@ class ConversationContext {
       content,
     };
 
+    const data = {
+      id: messageId,
+      member,
+      channelId,
+      role,
+      message: content,
+      timestamp,
+    };
+
     if (role === 'function' && functionName) {
       message.name = functionName;
+      data.name = functionName;
     }
     
     this.context.push(message);
@@ -202,14 +217,7 @@ class ConversationContext {
     const document = firestore.doc(`channels/${channelId}/messages/${timestamp}`);
 
     // Enter new data into the document.
-    document.set({
-      id: messageId,
-      member,
-      channelId,
-      role,
-      message: content,
-      timestamp,
-    });
+    document.set(data);
   }
 
   getContext() {
