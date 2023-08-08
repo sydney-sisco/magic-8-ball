@@ -51,21 +51,13 @@ const systemMessages = [
 
 const restart = require('../commands/restart.js');
 
-const gpt3 = async (message, args, {client, rl}) => {
+// load functions
+const { loadFunctions } = require('../functions/index.js');
+const functions = loadFunctions();
+
+const gpt3 = async (message) => {
   const member = message.member;
   const memberId = member.id;
-
-  const functions = [
-    {
-      name: 'restart',
-      description: 'Restart the robot',
-      parameters: {
-        type: 'object',
-        properties: {},
-      },
-      function: () => {restart[0].execute(null, null, {client, rl})},
-    },
-  ];
 
   const userPromptWithOptions = message.content.slice(GPT3_PREFIX.length).trim();
 
@@ -81,6 +73,75 @@ const gpt3 = async (message, args, {client, rl}) => {
   }
 
   // check userPrompt for commands
+  commandResponse = handleCommands(userPrompt, conversation);
+  if (commandResponse) {
+    return commandResponse;
+  }
+
+  // add the user's message to the conversation
+  conversation.addMessage('user', userPrompt, message);
+
+  const functionsToSend = functions.length ? functions.map(({execute, ...rest}) => rest) : undefined
+
+  console.log('sending context: ', conversation.getContext());
+  console.log('sending functions: ', functionsToSend);
+
+  let response;
+  try {
+
+    response = await createChatCompletion(conversation.getContext(), functionsToSend, memberId)
+
+    if (!response) {
+      return 'API Error, no response';
+    }
+
+    console.log('response: ', response.status, response.statusText, response.config.data, response.data);
+
+    if (response.status !== 200) {
+      console.log(response.statusText, response.data);
+      return 'API Error';
+    }
+
+    // check if GPT wants to call a function
+    while (response.data.choices[0].message.function_call) {
+      const function_call = response.data.choices[0].message.function_call;
+      const {function_name, functionResponse} = await handleFunctionCall(function_call, message, member, memberId, functions);
+
+      conversation.addMessage('function', functionResponse, message, function_name);
+
+      // send results back to model
+      response = await createChatCompletion(conversation.getContext(), functionsToSend, memberId)
+      console.log('response status: ', response.status, 'statusText: ', response.statusText, 'config data: ',response.config.data, 'response.data: ', response.data);
+      
+    }
+      
+    let gptMessage = response.data.choices[0].message.content.trim();
+    console.log('gptMessage:', gptMessage);
+
+
+    // add the AI's message to the conversation
+    conversation.addMessage('assistant', gptMessage, message);
+
+    // if gptMessage is longer than 2000 characters, split it into multiple messages, each less than 2000 characters
+    if (gptMessage.length > 2000) {
+      const splitMessages = gptMessage.match(/(.|[\r\n]){1,2000}/g);
+      return splitMessages;
+    }
+    return `${gptMessage}`;
+  } catch (error) {
+    if (error.response) {
+      console.log('error status: ', error.response.status);
+      console.log('error data: ', error.response.data);
+      return `API Error: ${error.response.status}: ${error.response.data.error.message}`;
+    } else {
+      console.log('error message: ', error.message);
+      return `API Error: ${error.message}`;
+    }
+  }
+
+}
+
+const handleCommands = (userPrompt, conversation) => {
   if (userPrompt.startsWith('!set')) {
     const customSystemMessage = userPrompt.slice('!set'.length).trim();
     conversation.setSystemMessage(customSystemMessage);
@@ -100,67 +161,27 @@ const gpt3 = async (message, args, {client, rl}) => {
     return 'Commands: !set <system message>, !reset, !show, !forget, !remember, !help';
   }
 
-  // add the user's message to the conversation
-  conversation.addMessage('user', userPrompt, message);
+  return false;
+};
 
-  console.log('sending: ', conversation.getContext());
+const createChatCompletion = async (messages, functions, memberId) => {
 
-  let response;
-  try {
-    response = await openai.createChatCompletion({
-      model: TEXT_MODEL,
-      messages: conversation.getContext(), // maybe pass in channel id here?
-      functions: functions.length ? functions : undefined,
-      // temperature: 0.9,
-      // max_tokens: 150,
-      // top_p: 1,
-      // frequency_penalty: 0,
-      // presence_penalty: 0.6,
-      user: memberId,
-    });
-
-    if (!response) {
-      return 'API Error, no response';
-    }
-
-    console.log('response: ', response);
-
-    if (response.status !== 200) {
-      console.log(response.statusText, response.data);
-      return 'API Error';
-    }
-
-    // check if GPT wants to call a function
-    if (response.data.choices[0].message.function_call) {
-      const function_call = response.data.choices[0].message.function_call;
-      handleFunctionCall(function_call, message, member, memberId, functions);
-      return `Function call handled: ${function_call.name}, ${function_call.parameters}`;
-    } else {
-      let gptMessage = response.data.choices[0].message.content.trim();
-      console.log('gptMessage:', gptMessage);
-  
-      // add the AI's message to the conversation
-      conversation.addMessage('assistant', gptMessage, message);
-  
-      // if gptMessage is longer than 2000 characters, split it into multiple messages, each less than 2000 characters
-      if (gptMessage.length > 2000) {
-        const splitMessages = gptMessage.match(/(.|[\r\n]){1,2000}/g);
-        return splitMessages;
-      }
-      return `${gptMessage}`;
-    }
-
-  } catch (error) {
-    if (error.response) {
-      console.log('error status: ', error.response.status);
-      console.log('error data: ', error.response.data);
-      return `API Error: ${error.response.status}: ${error.response.data.error.message}`;
-    } else {
-      console.log('error message: ', error.message);
-      return `API Error: ${error.message}`;
-    }
+  let functionsToSend = functions;
+  if (!functions || !functions.length) {
+    functionsToSend = undefined;
   }
-
+    
+  return await openai.createChatCompletion({
+    model: TEXT_MODEL,
+    messages,
+    functions: functionsToSend,
+    // temperature: 0.9,
+    // max_tokens: 150,
+    // top_p: 1,
+    // frequency_penalty: 0,
+    // presence_penalty: 0.6,
+    user: memberId,
+  });
 }
 
 const handleFunctionCall = async (function_call, message, member, memberId, functions) => {
@@ -175,11 +196,16 @@ const handleFunctionCall = async (function_call, message, member, memberId, func
     const functionObject = functions.find(f => f.name === function_name);
 
     console.log('functionObject:', functionObject);
-    const functionResponse = await functionObject.function(function_arguments);
+    let functionResponse = await functionObject.execute(function_arguments);
     
     console.log('functionResponse:', functionResponse);
 
-    gpt3({ ...message, member: {id: memberId, ...member}, content: functionResponse});
+    // if functionResponse is not a string, stringify it
+    if (typeof functionResponse !== 'string') {
+      functionResponse = JSON.stringify(functionResponse);
+    }
+
+    return { function_name, functionResponse };
   } 
 }
 

@@ -1,8 +1,9 @@
+const reddit = require('../functions/reddit.js');
+
 module.exports = [
   {
-    name: 'reddit',
+    ...reddit[0],
     prefix: '!reddit',
-    description: 'Fetches the first page of Reddit',
     execute: async (message, args, context) => {
       const postTitles = await fetchRedditFirstPage();
       message.channel.send(postTitles);
@@ -10,22 +11,17 @@ module.exports = [
   },
 ]
 
-const axios = require('axios');
-
 async function fetchRedditFirstPage() {
   try {
-    const response = await axios.get('https://www.reddit.com/.json');
-    const posts = response.data.data.children;
+    const posts = await reddit[0].execute();
 
-    let postTitles = '';
-    
-    posts.forEach((post, index) => {
-      console.log(`${index + 1}. ${post.data.title}`);
-      postTitles += `${index + 1}. ${post.data.title}\n`;
+    let formattedPosts = "";
+
+    posts.forEach(post => {
+      formattedPosts += `${post.title}\n`;
     });
 
-    return postTitles;
-
+    return formattedPosts; 
   } catch (error) {
     console.error(`Error fetching Reddit first page: ${error.message}`);
   }
