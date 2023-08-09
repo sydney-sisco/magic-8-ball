@@ -5,11 +5,13 @@
 const reddit = require('./reddit.js');
 const restart = require('./restart.js');
 const pokemon = require('./pokemon.js');
+const voice = require('./text-to-speech.js');
 
 const functionsToLoad = [
   ...restart,
   ...reddit,
   ...pokemon,
+  ...voice,
 ];
 
 function loadFunctions() {

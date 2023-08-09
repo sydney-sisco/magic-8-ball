@@ -102,7 +102,7 @@ const gpt3 = async (message, args, sysContext) => {
     // check if GPT wants to call a function
     while (response.data.choices[0].message.function_call) {
       const function_call = response.data.choices[0].message.function_call;
-      const {function_name, functionResponse} = await handleFunctionCall(function_call, functions, {...sysContext, message});
+      const {function_name, functionResponse} = await handleFunctionCall(function_call, functions, {...sysContext, message: {...message, member}});
 
       conversation.addMessage('function', functionResponse, message, function_name);
 
