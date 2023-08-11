@@ -102,7 +102,7 @@ const gpt3 = async (message, args, sysContext) => {
     // check if GPT wants to call a function
     while (response.data.choices[0].message.function_call) {
       const function_call = response.data.choices[0].message.function_call;
-      const {function_name, functionResponse} = await handleFunctionCall(function_call, functions, {...sysContext, message: {...message, member}});
+      const {function_name, functionResponse} = await handleFunctionCall(function_call, functions, {...sysContext, message, member});
 
       conversation.addMessage('function', functionResponse, message, function_name);
 
@@ -183,6 +183,7 @@ const createChatCompletion = async (messages, functions, memberId) => {
 const handleFunctionCall = async (function_call, functions, context) => {
   
   console.log('function_call:', function_call);
+  context.message.reply(`[System]: Calling function: \`${function_call.name}\` with arguments:\n\`\`\`json\n${function_call.arguments}\`\`\``);
   const function_name = function_call.name;
   const function_arguments = function_call.arguments;
 
@@ -200,6 +201,8 @@ const handleFunctionCall = async (function_call, functions, context) => {
     if (typeof functionResponse !== 'string') {
       functionResponse = JSON.stringify(functionResponse);
     }
+
+    context.message.reply(`[System]: Function \`${function_name}\` returned.`);
 
     return { function_name, functionResponse };
   } 
