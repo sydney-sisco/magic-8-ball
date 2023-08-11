@@ -16,7 +16,10 @@ module.exports = [
     execute: async (args, context) => {
       const { message } = context;
       voice({...message, content: args.text});
-      return args.text;
+      return {
+        success: true,
+        text: args.text,
+      };
     },
   }
 ]
