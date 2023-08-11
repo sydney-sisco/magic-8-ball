@@ -14,8 +14,8 @@ module.exports = [
       },
     },
     execute: async (args, context) => {
-      const { message } = context;
-      voice({...message, content: args.text});
+      const { message, member } = context;
+      voice({...message, content: args.text}, member);
       return {
         success: true,
         text: args.text,
@@ -93,7 +93,7 @@ async function connectToChannel(channel) {
   return connection;
 }
 
-const voice = async (message) => {
+const voice = async (message, member) => {
 
   const userPromptWithOptions = message.content.trim();
   const [userPrompt, options] = getOptions(userPromptWithOptions);
@@ -110,7 +110,7 @@ const voice = async (message) => {
     return message.reply('Error generating audio: ' + error.message);
   }
 
-  const connection = await connectToChannel(message.member?.voice.channel);
+  const connection = await connectToChannel(member?.voice?.channel);
 
   playAudio(connection);
 };
