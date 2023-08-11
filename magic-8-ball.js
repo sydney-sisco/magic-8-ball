@@ -52,8 +52,10 @@ const scry = () => {
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
-  const channel = client.channels.cache.get(process.env.ADMIN_CHANNEL_ID);
-  channel.send(`[System]: Online: ${client.user.tag}`);
+  if (process.env.ADMIN_CHANNEL_ID) {
+    const channel = client.channels.cache.get(process.env.ADMIN_CHANNEL_ID);
+    channel.send(`[System]: Online: ${client.user.tag}`);
+  }
 });
 
 client.on('messageCreate', async message => {
