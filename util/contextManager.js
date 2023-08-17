@@ -192,6 +192,14 @@ class ConversationContext {
     // get timestamp
     const timestamp = Date.now()
 
+    // handle undefined and null function return values
+    if (content === undefined) {
+      content = 'undefined';
+    }
+    if (content === null) {
+      content = 'null';
+    }
+
     const message = {
       role,
       content,
@@ -239,7 +247,7 @@ class ConversationContext {
 
   #manageContextLength = () => {
     // check total length of context
-    const totalLength = this.context.reduce((acc, cur) => acc + cur.content.length, 0);
+    const totalLength = this.context.reduce((acc, cur) => acc + cur.content?.length, 0);
 
     if (totalLength > CONTEXT_LENGTH) {
       // remove oldest context
