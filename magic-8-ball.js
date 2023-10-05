@@ -79,6 +79,17 @@ client.on('messageCreate', async message => {
     message.reply(`🎱 ${scry()} 🎱`);
     return;
   }
+
+  // check for mention of bot
+  if (message.mentions.has(client.user)) {
+    const messageWithoutMention = message.content.replace(`<@${client.user.id}>`, '').trim();
+    message.content = '!!' + messageWithoutMention;
+
+    const args = messageWithoutMention.split(/ +/);
+    commands.get('chat').execute(message, args, { client, rl, commands });
+
+    return;
+  }
 });
 
 client.login(process.env.DISCORD_BOT_TOKEN);
