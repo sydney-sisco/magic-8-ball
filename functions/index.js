@@ -8,10 +8,10 @@ const pokemon = require('./pokemon.js');
 const voice = require('./text-to-speech.js');
 
 const functionsToLoad = [
-  ...restart,
-  ...reddit,
-  ...pokemon,
-  ...voice,
+  // ...restart,
+  // ...reddit,
+  // ...pokemon,
+  // ...voice,
 ];
 
 function loadFunctions() {

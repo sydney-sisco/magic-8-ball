@@ -78,7 +78,7 @@ const gpt3 = async (message, args, sysContext) => {
   // add the user's message to the conversation
   conversation.addMessage('user', userPrompt, message);
 
-  const functionsToSend = functions.length ? functions.map(({execute, prefix, ...rest}) => rest) : undefined
+  const functionsToSend = functions.length ? functions.map(({execute, prefix, ...rest}) => rest) : [];
 
   console.log('sending context: ', conversation.getContext());
   console.log('sending functions: ', functionsToSend);
@@ -104,6 +104,9 @@ const gpt3 = async (message, args, sysContext) => {
       const function_call = response.data.choices[0].message.function_call;
       const {function_name, functionResponse} = await handleFunctionCall(function_call, functions, {...sysContext, message, member});
 
+      // TODO: log function params as well
+      // TODO: log BEFORE function call and then update? (ensures that the function call is logged even if it fails or RESTARTs for example)
+      // TODO: need a way for functions to indicate that the results do not need to be passed back to model (VOICE for example)
       conversation.addMessage('function', functionResponse, message, function_name);
 
       // send results back to model
