@@ -48,3 +48,11 @@ create .env at root of repo
 copy the contents from password manager
 
 copy gcp.json from password manager
+
+# thigns to look at:
+https://products.wolframalpha.com/llm-api/documentation
+
+fnctins:
+https://platform.openai.com/docs/api-reference/chat/create#chat/create-functions
+https://platform.openai.com/docs/guides/gpt/function-calling
+https://github.com/openai/openai-cookbook/blob/main/examples/How_to_call_functions_for_knowledge_retrieval.ipynb
