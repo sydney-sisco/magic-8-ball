@@ -3,7 +3,14 @@ const firestore = new Firestore();
 const CONTEXT_LENGTH = process.env.OPENAI_CONTEXT_LENGTH || 1000;
 const CONTEXT_MESSAGES_LIMIT = process.env.CONTEXT_MESSAGES_LIMIT || 10;
 
-const defaultSystemMessage = `You are a helpful Discord bot written in NodeJS v16. Please try to answer as concisely as possible. Your messages must be fewer than 2000 characters.`;
+const date = new Date();
+
+const day = String(date.getDate()).padStart(2, '0');
+const month = String(date.getMonth() + 1).padStart(2, '0'); //January is 0!
+const year = date.getFullYear();
+const today = `${year}-${month}-${day}`;
+
+const defaultSystemMessage = `You are Magic 8-Ball, a large language model based on the GPT-4 architecture. Knowledge cutoff: 2021-09. Current date: ${today}.`;
 
 class ConversationContext {
 
@@ -186,7 +193,7 @@ class ConversationContext {
   addMessage(role, content, originalMessage, functionName=null) {
 
     const messageId = role == 'user' ? originalMessage.id : null;
-    const member = role == 'user' ? originalMessage.member.id : null;
+    const member = role == 'user' ? originalMessage.author.id : null;
     const channelId = originalMessage.channelId;
 
     // get timestamp

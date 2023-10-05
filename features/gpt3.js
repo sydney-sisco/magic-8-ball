@@ -54,7 +54,7 @@ const functions = loadFunctions();
 
 const gpt3 = async (message, args, sysContext) => {
   const member = message.member;
-  const memberId = member.id;
+  const memberId = message.author.id;
 
   const userPromptWithOptions = message.content.slice(GPT3_PREFIX.length).trim();
 
