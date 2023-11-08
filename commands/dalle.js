@@ -13,11 +13,12 @@ module.exports = [
 
 var axios = require('axios');
 const { EmbedBuilder } = require('discord.js');
-const { Configuration, OpenAIApi } = require("openai");
-const configuration = new Configuration({
+const OpenAI = require("openai");
+const IMAGE_QUALITY = process.env.OPENAI_IMAGE_QUALITY || 'standard';
+
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-const openai = new OpenAIApi(configuration);
 const { getOptions } = require('../util/shared-helpers.js');
 
 const DALLE_PREFIX = '!i';
@@ -39,22 +40,24 @@ const createImage = async (userPrompt, member, message) => {
   }
 
   try {
-    const response = await openai.createImage({
+    const response = await openai.images.generate({
+      model:"dall-e-3",
       prompt: userPrompt,
       n: 1,
-      size: "512x512",
+      size: "1024x1024",
       user: member,
+      quality: IMAGE_QUALITY,
     });
     console.log('response: ', response);
-    const image_url = response.data.data[0].url;
+    const image_url = response.data[0].url;
 
     message.react('2️⃣');
 
-    if (response.status !== 200) {
-      console.log(response.statusText, response.data);
-      message.react('❌');
-      return 'API Error';
-    }
+    // if (response.status !== 200) {
+    //   console.log(response.statusText, response.data);
+    //   message.react('❌');
+    //   return 'API Error';
+    // }
 
     // invoke function to save image to cloud storage
     const hostedImageUrl = await invokeSaveFunction(image_url, userPrompt, member);

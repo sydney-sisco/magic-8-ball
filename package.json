@@ -24,7 +24,7 @@
     "google-auth-library": "^8.7.0",
     "image-downloader": "^4.3.0",
     "libsodium-wrappers": "^0.7.11",
-    "openai": "^3.2.1",
+    "openai": "^4.16.1",
     "openweather-apis": "^4.4.1",
     "pokemon.js": "^1.1.8",
     "suncalc": "^1.8.0"

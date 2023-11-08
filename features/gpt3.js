@@ -1,10 +1,10 @@
 const TEXT_MODEL = process.env.OPENAI_TEXT_MODEL || 'text-ada-001';
 
-const { Configuration, OpenAIApi } = require("openai");
-const configuration = new Configuration({
+const OpenAI = require("openai");
+
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-const openai = new OpenAIApi(configuration);
 
 const { getOptions } = require('../util/shared-helpers.js');
 
@@ -92,26 +92,26 @@ const gpt3 = async (message, args, sysContext) => {
       return 'API Error, no response';
     }
 
-    console.log('response: ', response.status, response.statusText, response.config.data, response.data);
+    console.log('response: ', response.status, response.statusText, response.config);
 
-    if (response.status !== 200) {
-      console.log(response.statusText, response.data);
-      return 'API Error';
-    }
+    // if (response.status !== 200) {
+    //   console.log(response.statusText);
+    //   return 'API Error';
+    // }
 
     // check if GPT wants to call a function
-    while (response.data.choices[0].message.function_call) {
-      const function_call = response.data.choices[0].message.function_call;
+    while (response.choices[0].message.function_call) {
+      const function_call = response.choices[0].message.function_call;
       const {function_name, functionResponse} = await handleFunctionCall(function_call, functions, {...sysContext, message});
 
       conversation.addMessage('function', functionResponse, message, function_name);
 
       // send results back to model
       response = await createChatCompletion(conversation.getContext(), functionsToSend, memberId)
-      console.log('response status: ', response.status, 'statusText: ', response.statusText, 'config data: ',response.config.data, 'response.data: ', response.data);
+      console.log('response status: ', response.status, 'statusText: ', response.statusText, 'config data: ',response.config.data);
     }
       
-    let gptMessage = response.data.choices[0].message.content.trim();
+    let gptMessage = response.choices[0].message.content.trim();
     console.log('gptMessage:', gptMessage);
 
 
@@ -167,7 +167,7 @@ const createChatCompletion = async (messages, functions, memberId) => {
     functionsToSend = undefined;
   }
     
-  return await openai.createChatCompletion({
+  return await openai.chat.completions.create({
     model: TEXT_MODEL,
     messages,
     functions: functionsToSend,
