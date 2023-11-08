@@ -63,13 +63,13 @@ const pokemonCommand = async (message) => {
   pokemonFn[0].execute({pokemon: pokemon})
   .then(res => {
     console.log(res);
-    if (res) {
+    if (res.pokemon) {
       const embed = new EmbedBuilder()
       .setColor('#0099ff')
-      .setTitle(`#${res.id} **${res.name}**`)
-      .setDescription(`${res.genera}
-      Type: ${res.types.join(', ')}`)
-      .setImage(res.sprite)
+      .setTitle(`#${res.pokemon.id} **${res.pokemon.name}**`)
+      .setDescription(`${res.pokemon.genera}
+      Type: ${res.pokemon.types.join(', ')}`)
+      .setImage(res.pokemon.sprite)
 
       message.reply({ embeds: [embed] } );
     } else {

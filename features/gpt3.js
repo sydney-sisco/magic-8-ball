@@ -54,7 +54,7 @@ const functions = loadFunctions();
 
 const gpt3 = async (message, args, sysContext) => {
   const member = message.member;
-  const memberId = member.id;
+  const memberId = message.author.id;
 
   const userPromptWithOptions = message.content.slice(GPT3_PREFIX.length).trim();
 
@@ -78,7 +78,7 @@ const gpt3 = async (message, args, sysContext) => {
   // add the user's message to the conversation
   conversation.addMessage('user', userPrompt, message);
 
-  const functionsToSend = functions.length ? functions.map(({execute, prefix, ...rest}) => rest) : undefined
+  const functionsToSend = functions.length ? functions.map(({execute, prefix, ...rest}) => rest) : [];
 
   console.log('sending context: ', conversation.getContext());
   console.log('sending functions: ', functionsToSend);
@@ -102,8 +102,11 @@ const gpt3 = async (message, args, sysContext) => {
     // check if GPT wants to call a function
     while (response.choices[0].message.function_call) {
       const function_call = response.choices[0].message.function_call;
-      const {function_name, functionResponse} = await handleFunctionCall(function_call, functions, {...sysContext, message});
+      const { function_name, functionResponse } = await handleFunctionCall(function_call, functions, { ...sysContext, message, member });
 
+      // TODO: log function params as well
+      // TODO: log BEFORE function call and then update? (ensures that the function call is logged even if it fails or RESTARTs for example)
+      // TODO: need a way for functions to indicate that the results do not need to be passed back to model (VOICE for example)
       conversation.addMessage('function', functionResponse, message, function_name);
 
       // send results back to model
@@ -183,6 +186,7 @@ const createChatCompletion = async (messages, functions, memberId) => {
 const handleFunctionCall = async (function_call, functions, context) => {
   
   console.log('function_call:', function_call);
+  context.message.reply(`[System]: Calling function: \`${function_call.name}\` with arguments:\n\`\`\`json\n${function_call.arguments}\`\`\``);
   const function_name = function_call.name;
   const function_arguments = function_call.arguments;
 
@@ -200,6 +204,8 @@ const handleFunctionCall = async (function_call, functions, context) => {
     if (typeof functionResponse !== 'string') {
       functionResponse = JSON.stringify(functionResponse);
     }
+
+    context.message.reply(`[System]: Function \`${function_name}\` returned.`);
 
     return { function_name, functionResponse };
   } 

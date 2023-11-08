@@ -1,14 +1,19 @@
 require('dotenv').config()
 
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, Partials, ChannelType } = require('discord.js');
 
 const client = new Client({
+  partials: [Partials.Message, Partials.User, Partials.Channel, Partials.Reaction],
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildMessageReactions,
     GatewayIntentBits.GuildVoiceStates,
+    // add DM intents
+    GatewayIntentBits.DirectMessages,
+    GatewayIntentBits.DirectMessageTyping,
+    GatewayIntentBits.DirectMessageReactions,
   ],
 });
 
@@ -52,8 +57,10 @@ const scry = () => {
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
-  const channel = client.channels.cache.get(process.env.ADMIN_CHANNEL_ID);
-  channel.send(`[System]: Online: ${client.user.tag}`);
+  if (process.env.ADMIN_CHANNEL_ID) {
+    const channel = client.channels.cache.get(process.env.ADMIN_CHANNEL_ID);
+    channel.send(`[System]: Online: ${client.user.tag}`);
+  }
 });
 
 client.on('messageCreate', async message => {
@@ -75,6 +82,17 @@ client.on('messageCreate', async message => {
 
   if (message.content.startsWith(PREFIX)) {
     message.reply(`🎱 ${scry()} 🎱`);
+    return;
+  }
+
+  // check for mention of bot
+  if (message.mentions.has(client.user)) {
+    const messageWithoutMention = message.content.replace(`<@${client.user.id}>`, '').trim();
+    message.content = '!!' + messageWithoutMention;
+
+    const args = messageWithoutMention.split(/ +/);
+    commands.get('chat').execute(message, args, { client, rl, commands });
+
     return;
   }
 });

@@ -27,7 +27,9 @@ const pokemon = async (pokemon) => {
   const pokemonFound = await Pokemon.getPokemon(pokemon);
 
   if (!pokemonFound) {
-    return;
+    return { 
+      error: `Pokemon ${pokemon} not found`,
+    };
   }
 
   const dataToReturn = {
@@ -38,5 +40,7 @@ const pokemon = async (pokemon) => {
     sprite: pokemonFound.sprites.front_default,
   };
   
-  return dataToReturn;
+  return {
+    pokemon: dataToReturn
+  };
 };
