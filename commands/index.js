@@ -23,6 +23,7 @@ const wolfram = require('./wolfram.js');
 const say = require('./text-to-speech.js');
 const dalle = require('./dalle.js');
 const chat = require('./chat.js');
+const checkReddit = require('./check_reddit.js');
 
 // commands here will be loaded
 const commandsToLoad = [
@@ -38,6 +39,7 @@ const commandsToLoad = [
   say,
   dalle,
   chat,
+  checkReddit,
 ];
 
 function loadCommands() {
