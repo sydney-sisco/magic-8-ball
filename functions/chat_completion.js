@@ -1,4 +1,4 @@
-// a very basic chat completion function 
+// a very basic chat completion function (returns json)
 
 module.exports = [
   {
@@ -29,7 +29,7 @@ module.exports = [
   },
 ]
 
-const TEXT_MODEL = 'gpt-3.5-turbo';
+const TEXT_MODEL = 'gpt-3.5-turbo-1106';
 const OpenAI = require("openai");
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -40,6 +40,7 @@ const createChatCompletion = async (messages, functions, memberId) => {
     model: TEXT_MODEL,
     messages,
     functions: !functions || !functions.length ? undefined : functions,
+    response_format: { type: "json_object" },
     // temperature: 0.9,
     // max_tokens: 150,
     // top_p: 1,
