@@ -60,6 +60,9 @@ client.on('ready', () => {
   if (process.env.ADMIN_CHANNEL_ID) {
     const channel = client.channels.cache.get(process.env.ADMIN_CHANNEL_ID);
     channel.send(`[System]: Online: ${client.user.tag}`);
+
+    // load cron jobs
+    require('./features/cron-jobs.js')(client, channel);
   }
 });
 
