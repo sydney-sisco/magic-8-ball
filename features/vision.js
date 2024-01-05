@@ -1,20 +1,19 @@
 const OpenAI = require("openai");
-
-
 const openai = new OpenAI();
 
-async function main() {
+async function processImage(imageURL, messageText) {
   const response = await openai.chat.completions.create({
     model: "gpt-4-vision-preview",
+    max_tokens: 300,
     messages: [
       {
         role: "user",
         content: [
-          { type: "text", text: "What’s in this image?" },
+          { type: "text", text: messageText },
           {
             type: "image_url",
             image_url: {
-              "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg",
+              "url": imageURL,
             },
           },
         ],
@@ -22,5 +21,9 @@ async function main() {
     ],
   });
   console.log(response.choices[0]);
+  return response.choices[0].message.content;
 }
-// main();
+
+module.exports = {
+  processImage,
+};
