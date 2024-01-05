@@ -62,7 +62,12 @@ client.on('ready', () => {
     channel.send(`[System]: Online: ${client.user.tag}`);
 
     // load cron jobs
-    require('./features/cron-jobs.js')(client, channel);
+    if (process.env.FF_CRON_JOBS) {
+      console.log('\x1b[32m%s\x1b[0m', '✅ Cron jobs enabled');
+      require('./features/cron-jobs.js')(client, channel);
+    } else {
+      console.log('\x1b[31m%s\x1b[0m', '❌ Cron jobs disabled');
+    }
   }
 });
 
