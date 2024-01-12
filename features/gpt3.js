@@ -6,8 +6,6 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const { getOptions } = require('../util/shared-helpers.js');
-
 const GPT3_PREFIX = '!!';
 
 const ConversationContext = require('../util/contextManager.js');
@@ -56,18 +54,9 @@ const gpt3 = async (message, args, sysContext) => {
   const member = message.member;
   const memberId = message.author.id;
 
-  const userPromptWithOptions = message.content.slice(GPT3_PREFIX.length).trim();
-
   // userPrompt is the string that the user typed, ready to be processed
-  const [userPrompt, options] = getOptions(userPromptWithOptions);
-
-  let conversation;
-  if (options.includes('c')) {
-    const context = systemMessages.find(sm => sm.shortName === 'code')
-    conversation = await ConversationContext.getNoContext(context.systemMessage.content, context.hints);
-  } else {
-    conversation = await ConversationContext.getConversation(message.channelId);
-  }
+  const userPrompt = message.content.slice(GPT3_PREFIX.length).trim();
+  conversation = await ConversationContext.getConversation(message.channelId);
 
   // check userPrompt for commands
   commandResponse = handleCommands(userPrompt, conversation);
