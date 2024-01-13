@@ -10,42 +10,6 @@ const GPT3_PREFIX = '!!';
 
 const ConversationContext = require('../util/contextManager.js');
 
-const systemMessages = [
-  {
-    role: 'default',
-    shortName: 'default',
-    systemMessage: 
-      {
-        role: 'system',
-        content: `You are a helpful Discord bot written in NodeJS v16. Please try to answer as concisely as possible. Your messages must be fewer than 2000 characters.`,
-      },
-    hints: [],
-  },
-  {
-    name: 'code-writing-bot',
-    shortName: 'code',
-    systemMessage: {  
-      role: 'system',
-      content: `You are a code writing bot. 
-      You write NodeJS 16 code.
-      You will be given a question and must write code that will assist in acquiring an answer.
-      Please return the code enclosed in double brackets <<like this>>.
-      Do not add comments. 
-      Do not add commentary.`
-    },
-    hints: [
-      { role: 'user', content: 'top post on reddit about cats' },
-      { role: 'assistant', content: `
-        <<const findHighestCatPost = async () => {
-        const response = await axios.get('https://www.reddit.com/.json');
-        const catPosts = response.data.data.children.filter(post => post.data.title.toLowerCase().includes('cat'));
-        const highestCatPost = catPosts.reduce((highest, post) => post.data.ups > highest.data.ups ? post : highest);
-        return highestCatPost.data.permalink;}findHighestCatPost();>>`
-      },
-    ],
-  },
-];
-
 // load functions
 const { loadFunctions } = require('../functions/index.js');
 const functions = loadFunctions();
