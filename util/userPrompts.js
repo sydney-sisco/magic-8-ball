@@ -1,5 +1,10 @@
 const crypto = require('crypto');
 
+// remove special characters but keep spaces
+const removeSpecialChars = (str) => {
+  return str.replace(/[^a-zA-Z0-9 -]/g, '');
+}
+
 function generateUniqueFilename(prompt) {
   const sanitizedPrompt = prompt.replace(/[^a-zA-Z0-9 -]/g, '')
     .replace(/\s+/g, '_')
@@ -12,8 +17,7 @@ function generateUniqueFilename(prompt) {
   return filename;
 }
 
-module.exports = { generateUniqueFilename };
-
-// Example usage
-// const filename = generateUniqueFilename("User's prompt with special characters!?");
-// console.log(filename);
+module.exports = {
+  generateUniqueFilename,
+  removeSpecialChars,
+};

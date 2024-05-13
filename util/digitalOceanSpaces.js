@@ -1,6 +1,6 @@
 const AWS = require('aws-sdk');
 var axios = require('axios');
-const { generateUniqueFilename } = require('./userPrompts.js');
+const { generateUniqueFilename, removeSpecialChars } = require('./userPrompts.js');
 
 const SPACES_ENDPOINT = process.env.DO_SPACES_ENDPOINT;
 const SPACES_NAME = process.env.DO_SPACES_NAME;
@@ -23,11 +23,12 @@ const saveImage = async (url, prompt, member) => {
 
 
   const filename = generateUniqueFilename(prompt);
+  const sanitizedPrompt = removeSpecialChars(prompt);
 
   const metadata = {
     'x-amz-acl': 'public-read',
     'member': member,
-    'prompt': prompt,
+    'prompt': sanitizedPrompt,
     'created': new Date().toISOString(),
   }
 
