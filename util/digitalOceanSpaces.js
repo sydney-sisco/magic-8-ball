@@ -45,5 +45,4 @@ const saveImage = async (url, prompt, member) => {
   return uploadedImage.Location;
 };
 
-
 module.exports = { saveImage };
