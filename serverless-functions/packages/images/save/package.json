@@ -1,7 +1,0 @@
-{
-  "main": "index.js",
-  "dependencies": {
-    "aws-sdk": "^2.1125.0",
-    "axios": "^1.2.3"
-  }
-}

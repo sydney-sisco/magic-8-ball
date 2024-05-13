@@ -11,10 +11,10 @@ module.exports = [
 ]
 
 
-var axios = require('axios');
 const { EmbedBuilder } = require('discord.js');
 const OpenAI = require("openai");
 const IMAGE_QUALITY = process.env.OPENAI_IMAGE_QUALITY || 'standard';
+const { saveImage } = require('../util/digitalOceanSpaces.js');
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -35,10 +35,6 @@ const createImage = async (userPrompt, member, message) => {
 
   message.react('1️⃣');
 
-  if (userPrompt.length > 256) {
-    return `Prompt must be less than 256 characters. Yours was ${userPrompt.length} characters.`;
-  }
-
   try {
     const response = await openai.images.generate({
       model:"dall-e-3",
@@ -53,14 +49,8 @@ const createImage = async (userPrompt, member, message) => {
 
     message.react('2️⃣');
 
-    // if (response.status !== 200) {
-    //   console.log(response.statusText, response.data);
-    //   message.react('❌');
-    //   return 'API Error';
-    // }
-
     // invoke function to save image to cloud storage
-    const hostedImageUrl = await invokeSaveFunction(image_url, userPrompt, member);
+    const hostedImageUrl = await saveImage(image_url, userPrompt, member);
 
     message.react('3️⃣');
 
@@ -85,22 +75,5 @@ const createImage = async (userPrompt, member, message) => {
       message.react('❌');
       return `API Error: ${error.message}`;
     }
-  }
-}
-
-const invokeSaveFunction = async (url, prompt, member) => {
-  const options = {
-    url,
-    prompt,
-    member,
-  };
-
-  try {
-    const response = await axios.post(`${process.env.DO_FUNCTION_URL}`, options);
-    console.log('response: ', response);
-    return response.data.url;
-  } catch (e) {
-    console.error(e);
-    return `Error saving image: ${e.message}`;
   }
 }
