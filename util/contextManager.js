@@ -190,21 +190,36 @@ class ConversationContext {
   }
 
 
-  addMessage(role, content, originalMessage, functionName=null) {
+  addMessage(role, userPrompt, originalMessage, functionName=null) {
 
-    const messageId = role == 'user' ? originalMessage.id : null;
-    const member = role == 'user' ? originalMessage.author.id : null;
+    // messages can be from the user or the bot
+    const isUserMessage = (role === 'user');
+
+    const messageId = isUserMessage ? originalMessage.id : null;
+    const member = isUserMessage ? originalMessage.author.id : null;
     const channelId = originalMessage.channelId;
 
     // get timestamp
     const timestamp = Date.now()
 
     // handle undefined and null function return values
-    if (content === undefined) {
-      content = 'undefined';
+    if (userPrompt === undefined) {
+      userPrompt = 'undefined';
     }
-    if (content === null) {
-      content = 'null';
+    if (userPrompt === null) {
+      userPrompt = 'null';
+    }
+
+    const content = [];
+    content.push({ type: 'text', text: userPrompt });
+
+    if (isUserMessage) {
+      // check for image attachments
+      if (originalMessage.attachments.size > 0) {
+        const attachment = originalMessage.attachments.first();
+        const image_url = attachment.url;
+        content.push({ type: 'image_url', image_url: { url: image_url } });
+      }
     }
 
     const message = {
@@ -217,7 +232,7 @@ class ConversationContext {
       member,
       channelId,
       role,
-      message: content,
+      message: userPrompt,
       timestamp,
     };
 

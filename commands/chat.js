@@ -10,27 +10,11 @@ module.exports = [
 ]
 
 const { gpt3 } = require('../features/gpt3');
-const { processImage } = require('../features/vision');
 
 
 const chat = (message, args, context) => {
   message.channel.sendTyping()
   const intervalId = setInterval(() => { message.channel.sendTyping() }, 5000);
-
-  // check if message has an attachment
-  if (message.attachments.size > 0) {
-    const attachment = message.attachments.first();
-    const image_url = attachment.url;
-    processImage(image_url, message.content)
-      .then((result) => {
-        message.reply(result);
-      })
-      .finally(() => {
-        // Clear the interval after processing the response
-        clearInterval(intervalId);
-      });
-    return;
-  }
 
   // Wrap the gpt3(message) call inside a Promise
   new Promise(async (resolve) => {

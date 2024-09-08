@@ -39,13 +39,15 @@ const gpt3 = async (message, args, sysContext) => {
   let response;
   try {
 
-    response = await createChatCompletion(conversation.getContext(), functionsToSend, memberId)
+    const context = conversation.getContext();
+
+    response = await createChatCompletion(context, functionsToSend, memberId)
 
     if (!response) {
       return 'API Error, no response';
     }
 
-    console.log('response: ', response.status, response.statusText, response.config);
+    console.log('response: ', response);
 
     // if (response.status !== 200) {
     //   console.log(response.statusText);
