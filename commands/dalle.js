@@ -55,7 +55,7 @@ const createImage = async (userPrompt, member, message) => {
     message.react('3️⃣');
 
     const imageEmbed = new EmbedBuilder()
-      .setTitle(`DALL·E Image: ${userPrompt}`)
+      .setTitle(`DALL·E Image: ${userPrompt.substring(0,100)}`)
       .setImage(hostedImageUrl)
       .setColor('#0099ff')
       .setTimestamp();
