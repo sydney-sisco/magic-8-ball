@@ -1,3 +1,4 @@
+const { isDiscordCDN, getQueryParamValue, hexToDecimal } = require('./url-helpers');
 const { Firestore } = require('@google-cloud/firestore');
 const firestore = new Firestore();
 const CONTEXT_LENGTH = process.env.OPENAI_CONTEXT_LENGTH || 1000;
@@ -251,10 +252,6 @@ class ConversationContext {
   }
 
   getContext() {
-    // return [this.systemMessage, ...this.hints, ...this.context];
-
-    const context = this.context;
-
     // if there is no system message, return default system message
     let systemMessage = this.systemMessage;
     if (!this.systemMessage) {
@@ -263,6 +260,9 @@ class ConversationContext {
         content: defaultSystemMessage,
       };
     }
+
+    // remove expired image attachments
+    this.#removeExpiredDiscordImageAttachements();
 
     return [systemMessage, ...this.context];
   }
@@ -278,6 +278,53 @@ class ConversationContext {
       // recursively check again
       this.#manageContextLength();
     }
+  }
+
+  #removeExpiredDiscordImageAttachements = () => {
+
+    const hasExpiredUrl = (content) => {
+      if (content.type !== 'image_url') {
+        return false;
+      }
+
+      const url = content.image_url.url;
+
+      if (!isDiscordCDN(url)) {
+        return false;
+      }
+
+      // ex is the query parameter for expiration timestamp, hex encoded
+      const hexExpirationTimestamp = getQueryParamValue(url, 'ex');
+
+      if (!hexExpirationTimestamp) {
+        return false;
+      }
+
+      const expirationTimestamp = hexToDecimal(hexExpirationTimestamp);
+
+      if (!expirationTimestamp) {
+        return false;
+      }
+
+      const currentTimestamp = Date.now();
+      const currentTimestampSeconds = Math.floor(currentTimestamp / 1000);
+      const isExpired = currentTimestampSeconds > expirationTimestamp;
+      return isExpired;
+    }
+
+    // loop through content array of each message
+    // if the content is an image_url and has expired, remove the message from context
+    this.context.forEach((message) => {
+
+      // if message.content is not an array, skip
+      if (!Array.isArray(message.content)) {
+        return;
+      }
+
+      message.content = message.content.filter((content) => {
+        return !hasExpiredUrl(content);
+      });
+    });
   }
 }
 
