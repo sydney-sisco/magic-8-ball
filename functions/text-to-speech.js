@@ -15,7 +15,7 @@ module.exports = [
     },
     execute: async (args, context) => {
       const { message, member } = context;
-      voice({...message, content: args.text}, member);
+      voice({ ...message, content: args.text }, member);
       return {
         success: true,
         text: args.text,
@@ -46,19 +46,19 @@ async function generateAudio(text) {
         // languageCode: "en-AU",
         // name: "en-AU-News-E",
         // ssmlGender: "FEMALE"
-        languageCode: "en-US",
-        name: "en-US-Studio-O",
-        ssmlGender: "FEMALE"
+        // languageCode: "en-US",
+        // name: "en-US-Studio-O",
+        // ssmlGender: "FEMALE"
         // languageCode: "ja-JP",
         // name: "ja-JP-Neural2-B",
         // ssmlGender: "FEMALE"
-        // languageCode: "ja-JP",
-        // name: "ja-JP-Neural2-D",
-        // ssmlGender: "MALE"
+        languageCode: "ja-JP",
+        name: "ja-JP-Neural2-D",
+        ssmlGender: "MALE"
       },
       audioConfig: { audioEncoding: 'MP3' },
     };
-    
+
     const [response] = await client.synthesizeSpeech(request);
 
     // Write the binary audio content to a local file

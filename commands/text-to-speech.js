@@ -27,24 +27,43 @@ const client = new textToSpeech.TextToSpeechClient();
 async function generateAudio(text) {
   try {
     const request = {
+      // input: { ssml: text },
       input: { text: text },
       voice: {
+
+        // aussie girl
         // languageCode: "en-AU",
         // name: "en-AU-News-E",
         // ssmlGender: "FEMALE"
-        languageCode: "en-US",
-        name: "en-US-Studio-O",
-        ssmlGender: "FEMALE"
+
+        // the usual female voice we use
+        // languageCode: "en-US",
+        // name: "en-US-Studio-O",
+        // ssmlGender: "FEMALE"
+
+        // japanese female
         // languageCode: "ja-JP",
         // name: "ja-JP-Neural2-B",
         // ssmlGender: "FEMALE"
+
+        // japanese man
         // languageCode: "ja-JP",
         // name: "ja-JP-Neural2-D",
         // ssmlGender: "MALE"
+
+        // chinese man
+        // languageCode: "cmn-CN",
+        // name: "cmn-CN-Chirp3-HD-Algenib",
+        // ssmlGender: "MALE"
+
+        // chinese man
+        languageCode: "cmn-CN",
+        name: "cmn-CN-Chirp3-HD-Schedar",
+        ssmlGender: "MALE"
       },
       audioConfig: { audioEncoding: 'MP3' },
     };
-    
+
     const [response] = await client.synthesizeSpeech(request);
 
     // Write the binary audio content to a local file

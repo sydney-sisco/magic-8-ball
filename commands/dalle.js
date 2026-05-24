@@ -13,8 +13,8 @@ module.exports = [
 
 const { EmbedBuilder } = require('discord.js');
 const OpenAI = require("openai");
-const IMAGE_QUALITY = process.env.OPENAI_IMAGE_QUALITY || 'standard';
-const { saveImage } = require('../util/digitalOceanSpaces.js');
+const IMAGE_QUALITY = process.env.OPENAI_IMAGE_QUALITY || 'auto';
+const { saveImage, saveLocalImage } = require('../util/digitalOceanSpaces.js');
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -37,7 +37,7 @@ const createImage = async (userPrompt, member, message) => {
 
   try {
     const response = await openai.images.generate({
-      model:"dall-e-3",
+      model: "gpt-image-1-mini",
       prompt: userPrompt,
       n: 1,
       size: "1024x1024",
@@ -45,17 +45,22 @@ const createImage = async (userPrompt, member, message) => {
       quality: IMAGE_QUALITY,
     });
     console.log('response: ', response);
-    const image_url = response.data[0].url;
+    // const image_url = response.data[0].url;
+
+    const image_base64 = response.data[0].b64_json;
+    const image_bytes = Buffer.from(image_base64, "base64");
+
 
     message.react('2️⃣');
 
     // invoke function to save image to cloud storage
-    const hostedImageUrl = await saveImage(image_url, userPrompt, member);
+    // const hostedImageUrl = await saveImage(image_url, userPrompt, member);
+    const hostedImageUrl = await saveLocalImage(image_bytes, userPrompt, member);
 
     message.react('3️⃣');
 
     const imageEmbed = new EmbedBuilder()
-      .setTitle(`DALL·E Image: ${userPrompt.substring(0,100)}`)
+      .setTitle(`DALL·E Image: ${userPrompt.substring(0, 100)}`)
       .setImage(hostedImageUrl)
       .setColor('#0099ff')
       .setTimestamp();

@@ -22,8 +22,10 @@ const reddit = require('./reddit.js');
 const wolfram = require('./wolfram.js');
 const say = require('./text-to-speech.js');
 const dalle = require('./dalle.js');
+const draw = require('./draw.js');
 const chat = require('./chat.js');
 const checkReddit = require('./check_reddit.js');
+const ssml = require('./text-to-speech-ssml.js')
 
 // commands here will be loaded
 const commandsToLoad = [
@@ -38,8 +40,10 @@ const commandsToLoad = [
   wolfram,
   say,
   dalle,
+  draw,
   chat,
   checkReddit,
+  ssml,
 ];
 
 function loadCommands() {

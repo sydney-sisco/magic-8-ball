@@ -17,7 +17,7 @@ const saveImage = async (url, prompt, member) => {
     accessKeyId: SPACES_KEY,
     secretAccessKey: SPACES_SECRET
   })
-  
+
   const response = await axios.get(url, { responseType: 'arraybuffer' })
   const buffer = Buffer.from(response.data, "utf-8")
 
@@ -46,4 +46,37 @@ const saveImage = async (url, prompt, member) => {
   return uploadedImage.Location;
 };
 
-module.exports = { saveImage };
+// saves a local image buffer to Digital Ocean Spaces and returns the URL
+const saveLocalImage = async (buffer, prompt, member) => {
+
+  const s3 = new AWS.S3({
+    endpoint: SPACES_ENDPOINT,
+    accessKeyId: SPACES_KEY,
+    secretAccessKey: SPACES_SECRET
+  });
+
+  const filename = generateUniqueFilename(prompt);
+  const sanitizedPrompt = removeSpecialChars(prompt);
+
+  const metadata = {
+    'x-amz-acl': 'public-read',
+    'member': member,
+    'prompt': sanitizedPrompt,
+    'created': new Date().toISOString(),
+  };
+
+  const uploadedImage = await s3.upload({
+    Bucket: SPACES_NAME,
+    Key: filename,
+    Body: buffer,
+    ACL: 'public-read',
+    ContentType: 'image/png',
+    Metadata: metadata,
+  }).promise();
+
+  console.log('DO res:', uploadedImage);
+
+  return uploadedImage.Location;
+};
+
+module.exports = { saveImage, saveLocalImage };

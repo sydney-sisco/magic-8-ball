@@ -10,6 +10,7 @@ module.exports = [
 ]
 
 const { gpt3 } = require('../features/gpt3');
+const speech = require('../commands/text-to-speech.js');
 
 
 const chat = (message, args, context) => {
@@ -30,15 +31,21 @@ const chat = (message, args, context) => {
       if (Array.isArray(result)) {
         result.forEach(async (item) => {
           const response = await message.reply(item);
-          response.react('❤️');
-          response.react('👎');
+          // response.react('❤️');
+          // response.react('👎');
         });
         return;
       }
 
       const response = await message.reply(result);
-      response.react('❤️');
-      response.react('👎');
+
+      if (message.channel.id === '715424064512065539') {
+        const message_with_robot_text = message;
+        message_with_robot_text.content = '!say' + result;
+        speech[0].execute(message_with_robot_text);
+      }
+      // response.react('❤️');
+      // response.react('👎');
     })
     .finally(() => {
       // Clear the interval after processing the response
