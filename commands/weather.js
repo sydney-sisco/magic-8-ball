@@ -14,7 +14,7 @@ var weather = require('openweather-apis');
 weather.setAPPID(process.env.OPEN_WEATHER_MAP);
 weather.setLang('en');
 // 'metric'  'internal'  'imperial'
-weather.setUnits('metric');
+weather.setUnits('imperial');
 
 const getWeatherData = location => {
   weather.setCity(location);
@@ -22,14 +22,14 @@ const getWeatherData = location => {
   return new Promise((resolve, reject) => {
     weather.getSmartJSON((err, smart) => {
       console.log('weather data:', smart);
-      
-      if(err) reject(err);
 
-      if(!smart) {
+      if (err) reject(err);
+
+      if (!smart) {
         reject(`Weather data for ${location} not found`);
         return;
       }
-  
+
       resolve(smart);
     });
   });
@@ -42,14 +42,14 @@ const getWeather = message => {
   return new Promise((resolve, reject) => {
     weather.getSmartJSON((err, smart) => {
       console.log('weather data:', smart);
-      
-      if(err) reject(err);
 
-      if(!smart) {
+      if (err) reject(err);
+
+      if (!smart) {
         reject(`Weather data for ${location} not found`);
         return;
       }
-  
+
       resolve(`weather data for ${location}:
       > temp: ${smart.temp.toFixed(0)}°C
       > description: ${smart.description} ${getWeatherEmoji(smart.weathercode)}
@@ -64,19 +64,19 @@ const getWeatherEmoji = weatherCode => {
 
   // console.log('weatherEmojis[weatherCode]', weatherEmojis[weatherCode], weatherCode);
 
-  return  weatherEmoji ? weatherEmoji : '';
+  return weatherEmoji ? weatherEmoji : '';
 }
 
 const weatherEmojis = {
   200: '🌩️',
-  201: '⛈️',	
-  202: '⛈️',	
-  210: '🌩️',	
-  211: '🌩️',	
-  212: '⛈️',	
-  221: '🌩️',	
-  230: '⛈️',	
-  231: '⛈️',	
+  201: '⛈️',
+  202: '⛈️',
+  210: '🌩️',
+  211: '🌩️',
+  212: '⛈️',
+  221: '🌩️',
+  230: '⛈️',
+  231: '⛈️',
   232: '⛈️',
   300: '🌧️',
   301: '🌧️',
