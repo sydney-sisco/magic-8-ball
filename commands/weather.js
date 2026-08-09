@@ -51,7 +51,7 @@ const getWeather = message => {
       }
 
       resolve(`weather data for ${location}:
-      > temp: ${smart.temp.toFixed(0)}°C
+      > temp: ${smart.temp.toFixed(0)}°F
       > description: ${smart.description} ${getWeatherEmoji(smart.weathercode)}
       > humidity ${smart.humidity}%`);
     });
