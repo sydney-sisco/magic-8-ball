@@ -21,6 +21,11 @@ const tools = functions.map(({ execute, prefix, ...rest }) => ({
   function: rest,
 }));
 
+// add a status reaction to the user's message without letting a failure crash the bot
+const reactQuietly = (message, emoji) => {
+  message.react(emoji).catch(() => {});
+};
+
 const gpt3 = async (message, args, sysContext) => {
   const member = message.member;
   const memberId = message.author.id;
@@ -69,11 +74,13 @@ const gpt3 = async (message, args, sysContext) => {
         const { name, arguments: rawArguments } = toolCall.function;
         console.log('tool_call:', toolCall);
 
-        message.reply(`[System]: Calling function: \`${name}\` with arguments:\n\`\`\`json\n${rawArguments}\`\`\``);
+        console.log(`[System]: Calling function: \`${name}\` with arguments:\n\`\`\`json\n${rawArguments}\`\`\``);
+        reactQuietly(message, '⚙️');
 
         const fn = functions.find(f => f.name === name);
         if (!fn) {
           conversation.addMessage('tool', `Error: unknown function \`${name}\``, message, null, { toolCallId: toolCall.id });
+          reactQuietly(message, '❌');
           continue;
         }
 
@@ -82,6 +89,7 @@ const gpt3 = async (message, args, sysContext) => {
           functionResponse = await fn.execute(JSON.parse(rawArguments || '{}'), { ...sysContext, message, member });
         } catch (error) {
           console.log('function error: ', error);
+          reactQuietly(message, '❌');
           functionResponse = typeof error === 'string' ? error : `Error: ${error.message}`;
         }
 
@@ -91,7 +99,9 @@ const gpt3 = async (message, args, sysContext) => {
         }
 
         conversation.addMessage('tool', functionResponse, message, null, { toolCallId: toolCall.id });
-        message.reply(`[System]: Function \`${name}\` returned.`);
+
+        console.log(`[System]: Function \`${name}\` returned with: ${functionResponse}`);
+        reactQuietly(message, '✅');
       }
 
       // send results back to model
