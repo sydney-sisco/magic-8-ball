@@ -26,6 +26,7 @@ const dalle = require('./dalle.js');
 const chat = require('./chat.js');
 const checkReddit = require('./check_reddit.js');
 const ssml = require('./text-to-speech-ssml.js')
+const reminders = require('./reminders.js')
 
 // commands here will be loaded
 const commandsToLoad = [
@@ -44,6 +45,7 @@ const commandsToLoad = [
   chat,
   checkReddit,
   ssml,
+  reminders,
 ];
 
 function loadCommands() {
