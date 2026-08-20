@@ -6,12 +6,16 @@ const reddit = require('./reddit.js');
 const restart = require('./restart.js');
 const pokemon = require('./pokemon.js');
 const voice = require('./text-to-speech.js');
+const weather = require('./weather.js');
+const reminder = require('./reminder.js');
 
 const functionsToLoad = [
   // ...restart,
   // ...reddit,
   // ...pokemon,
   // ...voice,
+  ...weather,
+  ...reminder,
 ];
 
 function loadFunctions() {

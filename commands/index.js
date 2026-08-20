@@ -22,7 +22,7 @@ const reddit = require('./reddit.js');
 const wolfram = require('./wolfram.js');
 const say = require('./text-to-speech.js');
 const dalle = require('./dalle.js');
-const draw = require('./draw.js');
+// const draw = require('./draw.js'); // temporarily disabled: requires the native `canvas` dependency
 const chat = require('./chat.js');
 const checkReddit = require('./check_reddit.js');
 const ssml = require('./text-to-speech-ssml.js')
@@ -40,7 +40,7 @@ const commandsToLoad = [
   wolfram,
   say,
   dalle,
-  draw,
+  // draw, // temporarily disabled: requires the native `canvas` dependency
   chat,
   checkReddit,
   ssml,

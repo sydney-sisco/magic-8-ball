@@ -124,3 +124,9 @@ config.json
 settings.json
 images/*.png
 gcp.json
+
+# SQLite database files
+*.db
+*.db-journal
+*.db-wal
+*.db-shm

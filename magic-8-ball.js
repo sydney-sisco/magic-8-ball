@@ -21,6 +21,9 @@ const client = new Client({
 // load command line interface
 rl = require('./features/command-line-interface.js')(client);
 
+// reminder scheduler (fires due reminders set via the chatbot)
+const { startReminderScheduler } = require('./features/reminders.js');
+
 // load additional commands
 const { loadCommands } = require('./commands/index.js');
 const commands = loadCommands();
@@ -69,6 +72,9 @@ client.on('ready', () => {
       console.log('\x1b[31m%s\x1b[0m', '❌ Cron jobs disabled');
     }
   }
+
+  // start the reminder scheduler (always on)
+  startReminderScheduler(client);
 });
 
 client.on('messageCreate', async message => {

@@ -10,7 +10,9 @@ module.exports = [
     },
 ]
 
-const { createCanvas } = require('canvas');
+// canvas is a native dependency that is currently disabled (it fails to build on some systems).
+// it is required lazily inside setupCanvasAndDraw() so this module can still load without it.
+// const { createCanvas } = require('canvas');
 const fs = require('fs');
 
 const { EmbedBuilder } = require('discord.js');
@@ -35,6 +37,14 @@ const draw = async (message) => {
 
 
 function setupCanvasAndDraw(drawCodeString) {
+    // require canvas lazily so the module can load without it installed
+    let createCanvas;
+    try {
+        ({ createCanvas } = require('canvas'));
+    } catch (error) {
+        throw new Error('The `canvas` dependency is not available, so !draw is currently disabled.');
+    }
+
     const width = 800;
     const height = 600;
     const canvas = createCanvas(width, height);

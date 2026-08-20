@@ -15,6 +15,12 @@ const ConversationContext = require('../util/contextManager.js');
 const { loadFunctions } = require('../functions/index.js');
 const functions = loadFunctions();
 
+// map the registered functions to the OpenAI/DeepSeek `tools` format
+const tools = functions.map(({ execute, prefix, ...rest }) => ({
+  type: 'function',
+  function: rest,
+}));
+
 const gpt3 = async (message, args, sysContext) => {
   const member = message.member;
   const memberId = message.author.id;
@@ -32,17 +38,17 @@ const gpt3 = async (message, args, sysContext) => {
   // add the user's message to the conversation
   conversation.addMessage('user', userPrompt, message);
 
-  const functionsToSend = functions.length ? functions.map(({ execute, prefix, ...rest }) => rest) : [];
+  const toolsToSend = tools.length ? tools : undefined;
 
   console.log('sending context: ', conversation.getContext());
-  console.log('sending functions: ', functionsToSend);
+  console.log('sending tools: ', toolsToSend);
 
   let response;
   try {
 
     const context = conversation.getContext();
 
-    response = await createChatCompletion(context, functionsToSend, memberId)
+    response = await createChatCompletion(context, toolsToSend, memberId)
 
     if (!response) {
       return 'API Error, no response';
@@ -50,29 +56,55 @@ const gpt3 = async (message, args, sysContext) => {
 
     console.log('response: ', response);
 
-    // if (response.status !== 200) {
-    //   console.log(response.statusText);
-    //   return 'API Error';
-    // }
+    // check if the model wants to call any tools
+    let toolCallBudget = 5; // safety valve against infinite tool loops
+    while (response.choices[0].message.tool_calls && toolCallBudget-- > 0) {
+      // strip fields the API adds (like `index`) that shouldn't be echoed back
+      const toolCalls = response.choices[0].message.tool_calls.map(({ index, ...rest }) => rest);
 
-    // check if GPT wants to call a function
-    while (response.choices[0].message.function_call) {
-      const function_call = response.choices[0].message.function_call;
-      const { function_name, functionResponse } = await handleFunctionCall(function_call, functions, { ...sysContext, message, member });
+      // the assistant message announcing the tool calls must stay in the history
+      conversation.addMessage('assistant', null, message, null, { toolCalls });
 
-      // TODO: log function params as well
-      // TODO: log BEFORE function call and then update? (ensures that the function call is logged even if it fails or RESTARTs for example)
-      // TODO: need a way for functions to indicate that the results do not need to be passed back to model (VOICE for example)
-      conversation.addMessage('function', functionResponse, message, function_name);
+      for (const toolCall of toolCalls) {
+        const { name, arguments: rawArguments } = toolCall.function;
+        console.log('tool_call:', toolCall);
+
+        message.reply(`[System]: Calling function: \`${name}\` with arguments:\n\`\`\`json\n${rawArguments}\`\`\``);
+
+        const fn = functions.find(f => f.name === name);
+        if (!fn) {
+          conversation.addMessage('tool', `Error: unknown function \`${name}\``, message, null, { toolCallId: toolCall.id });
+          continue;
+        }
+
+        let functionResponse;
+        try {
+          functionResponse = await fn.execute(JSON.parse(rawArguments || '{}'), { ...sysContext, message, member });
+        } catch (error) {
+          console.log('function error: ', error);
+          functionResponse = typeof error === 'string' ? error : `Error: ${error.message}`;
+        }
+
+        // if functionResponse is not a string, stringify it
+        if (typeof functionResponse !== 'string') {
+          functionResponse = JSON.stringify(functionResponse);
+        }
+
+        conversation.addMessage('tool', functionResponse, message, null, { toolCallId: toolCall.id });
+        message.reply(`[System]: Function \`${name}\` returned.`);
+      }
 
       // send results back to model
-      response = await createChatCompletion(conversation.getContext(), functionsToSend, memberId)
-      console.log('response status: ', response.status, 'statusText: ', response.statusText, 'config data: ', response.config.data);
+      response = await createChatCompletion(conversation.getContext(), toolsToSend, memberId)
+      console.log('response id: ', response.id, 'finish_reason: ', response.choices[0].finish_reason);
     }
 
-    let gptMessage = response.choices[0].message.content.trim();
+    const gptMessage = response.choices[0].message.content?.trim();
     console.log('gptMessage:', gptMessage);
 
+    if (!gptMessage) {
+      return 'I hit the tool call limit without a final answer. Please try again.';
+    }
 
     // add the AI's message to the conversation
     conversation.addMessage('assistant', gptMessage, message);
@@ -84,14 +116,21 @@ const gpt3 = async (message, args, sysContext) => {
     }
     return `${gptMessage}`;
   } catch (error) {
+    if (error.status) {
+      // openai SDK v4 API errors
+      console.log('error status: ', error.status);
+      console.log('error data: ', error.error);
+      return `API Error: ${error.status}: ${error.error?.message || error.message}`;
+    }
     if (error.response) {
+      // legacy axios-style errors
       console.log('error status: ', error.response.status);
       console.log('error data: ', error.response.data);
-      return `API Error: ${error.response.status}: ${error.response.data.error.message}`;
-    } else {
-      console.log('error message: ', error.message);
-      return `API Error: ${error.message}`;
+      return `API Error: ${error.response.status}: ${error.response.data?.error?.message || error.response.statusText}`;
     }
+    console.log('error message: ', error.message);
+    console.log('error stack: ', error.stack);
+    return `API Error: ${error.message}`;
   }
 
 }
@@ -119,52 +158,25 @@ const handleCommands = (userPrompt, conversation) => {
   return false;
 };
 
-const createChatCompletion = async (messages, functions, memberId) => {
+const createChatCompletion = async (messages, tools, memberId) => {
 
-  let functionsToSend = functions;
-  if (!functions || !functions.length) {
-    functionsToSend = undefined;
-  }
-
-  return await openai.chat.completions.create({
+  const params = {
     model: TEXT_MODEL,
     messages,
-    functions: functionsToSend,
     // temperature: 0.9,
     // max_tokens: 150,
     // top_p: 1,
     // frequency_penalty: 0,
     // presence_penalty: 0.6,
     user: memberId,
-  });
-}
+  };
 
-const handleFunctionCall = async (function_call, functions, context) => {
-
-  console.log('function_call:', function_call);
-  context.message.reply(`[System]: Calling function: \`${function_call.name}\` with arguments:\n\`\`\`json\n${function_call.arguments}\`\`\``);
-  const function_name = function_call.name;
-  const function_arguments = function_call.arguments;
-
-
-  // match function name dynamically
-  if (functions.find(f => f.name === function_name)) {
-    const functionObject = functions.find(f => f.name === function_name);
-
-    console.log('functionObject:', functionObject);
-    let functionResponse = await functionObject.execute(JSON.parse(function_arguments), context);
-
-    console.log('functionResponse:', functionResponse);
-
-    // if functionResponse is not a string, stringify it
-    if (typeof functionResponse !== 'string') {
-      functionResponse = JSON.stringify(functionResponse);
-    }
-
-    context.message.reply(`[System]: Function \`${function_name}\` returned.`);
-
-    return { function_name, functionResponse };
+  if (tools && tools.length) {
+    params.tools = tools;
+    params.tool_choice = 'auto';
   }
+
+  return await openai.chat.completions.create(params);
 }
 
 module.exports = {
