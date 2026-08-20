@@ -56,3 +56,11 @@ fnctins:
 https://platform.openai.com/docs/api-reference/chat/create#chat/create-functions
 https://platform.openai.com/docs/guides/gpt/function-calling
 https://github.com/openai/openai-cookbook/blob/main/examples/How_to_call_functions_for_knowledge_retrieval.ipynb
+
+## DeepSeek
+
+Swapping to DeepSeek.
+
+usage tracking: https://platform.deepseek.com/usage
+
+api docs: https://api-docs.deepseek.com/

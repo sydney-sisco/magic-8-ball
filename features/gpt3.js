@@ -3,6 +3,7 @@ const TEXT_MODEL = process.env.OPENAI_TEXT_MODEL || 'text-ada-001';
 const OpenAI = require("openai");
 
 const openai = new OpenAI({
+  baseURL: process.env.OPENAI_BASE_URL,
   apiKey: process.env.OPENAI_API_KEY,
 });
 
@@ -31,7 +32,7 @@ const gpt3 = async (message, args, sysContext) => {
   // add the user's message to the conversation
   conversation.addMessage('user', userPrompt, message);
 
-  const functionsToSend = functions.length ? functions.map(({execute, prefix, ...rest}) => rest) : [];
+  const functionsToSend = functions.length ? functions.map(({ execute, prefix, ...rest }) => rest) : [];
 
   console.log('sending context: ', conversation.getContext());
   console.log('sending functions: ', functionsToSend);
@@ -66,9 +67,9 @@ const gpt3 = async (message, args, sysContext) => {
 
       // send results back to model
       response = await createChatCompletion(conversation.getContext(), functionsToSend, memberId)
-      console.log('response status: ', response.status, 'statusText: ', response.statusText, 'config data: ',response.config.data);
+      console.log('response status: ', response.status, 'statusText: ', response.statusText, 'config data: ', response.config.data);
     }
-      
+
     let gptMessage = response.choices[0].message.content.trim();
     console.log('gptMessage:', gptMessage);
 
@@ -124,7 +125,7 @@ const createChatCompletion = async (messages, functions, memberId) => {
   if (!functions || !functions.length) {
     functionsToSend = undefined;
   }
-    
+
   return await openai.chat.completions.create({
     model: TEXT_MODEL,
     messages,
@@ -139,7 +140,7 @@ const createChatCompletion = async (messages, functions, memberId) => {
 }
 
 const handleFunctionCall = async (function_call, functions, context) => {
-  
+
   console.log('function_call:', function_call);
   context.message.reply(`[System]: Calling function: \`${function_call.name}\` with arguments:\n\`\`\`json\n${function_call.arguments}\`\`\``);
   const function_name = function_call.name;
@@ -152,7 +153,7 @@ const handleFunctionCall = async (function_call, functions, context) => {
 
     console.log('functionObject:', functionObject);
     let functionResponse = await functionObject.execute(JSON.parse(function_arguments), context);
-    
+
     console.log('functionResponse:', functionResponse);
 
     // if functionResponse is not a string, stringify it
@@ -163,7 +164,7 @@ const handleFunctionCall = async (function_call, functions, context) => {
     context.message.reply(`[System]: Function \`${function_name}\` returned.`);
 
     return { function_name, functionResponse };
-  } 
+  }
 }
 
 module.exports = {
