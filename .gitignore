@@ -130,3 +130,6 @@ gcp.json
 *.db-journal
 *.db-wal
 *.db-shm
+
+# TTS audio output
+output-*.mp3
