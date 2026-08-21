@@ -273,11 +273,26 @@ class ConversationContext {
       content.push({ type: 'text', text: userPrompt });
 
       if (isUserMessage) {
-        // check for image attachments
-        if (originalMessage.attachments.size > 0) {
-          const attachment = originalMessage.attachments.first();
-          const image_url = attachment.url;
-          content.push({ type: 'image_url', image_url: { url: image_url } });
+        if (options.imageUrls?.length) {
+          // pre-downloaded inline images (base64 data URLs) from gpt3.js
+          for (const url of options.imageUrls) {
+            content.push({ type: 'image_url', image_url: { url } });
+          }
+        } else {
+          // fallback: pass attachment URLs directly (JPEG/PNG/GIF/WebP only)
+          const supportedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+          if (originalMessage.attachments.size > 0) {
+            originalMessage.attachments.forEach((attachment) => {
+              const contentType = attachment.contentType || '';
+              const isImage = supportedImageTypes.includes(contentType) ||
+                /\.(jpe?g|png|gif|webp)$/i.test(attachment.url || '');
+              if (isImage && attachment.url) {
+                // trim whitespace / trailing '&' some CDNs leave in URLs
+                const url = attachment.url.trim().replace(/&+$/, '');
+                content.push({ type: 'image_url', image_url: { url } });
+              }
+            });
+          }
         }
       }
 

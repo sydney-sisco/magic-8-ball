@@ -1,6 +1,8 @@
 const TEXT_MODEL = process.env.OPENAI_TEXT_MODEL || 'text-ada-001';
+const VISION_MODEL = process.env.OPENAI_VISION_MODEL || 'deepseek-v4-flash-vision-exp';
 
 const OpenAI = require("openai");
+const axios = require('axios');
 
 const openai = new OpenAI({
   baseURL: process.env.OPENAI_BASE_URL,
@@ -26,6 +28,37 @@ const reactQuietly = (message, emoji) => {
   message.react(emoji).catch(() => {});
 };
 
+// supported image types (vision): JPEG/PNG/GIF/WebP
+const SUPPORTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+const isSupportedImage = (attachment) => {
+  const contentType = attachment.contentType || '';
+  return SUPPORTED_IMAGE_TYPES.includes(contentType) ||
+    /\.(jpe?g|png|gif|webp)$/i.test(attachment.url || '');
+};
+
+// download attached images and return them as inline base64 data URLs.
+// Sending images inline is more reliable than letting the API fetch Discord
+// CDN URLs itself (which some providers refuse to download).
+const prepareImages = async (message) => {
+  if (!message.attachments.size) return [];
+
+  const dataUrls = [];
+  for (const attachment of message.attachments.values()) {
+    if (!isSupportedImage(attachment)) continue;
+
+    try {
+      const response = await axios.get(attachment.url, { responseType: 'arraybuffer', timeout: 20000 });
+      const contentType = attachment.contentType || response.headers['content-type'] || 'image/jpeg';
+      dataUrls.push(`data:${contentType};base64,${Buffer.from(response.data).toString('base64')}`);
+    } catch (error) {
+      // skip images we can't download rather than failing the whole request
+      console.log('image download failed, skipping:', error.message);
+    }
+  }
+  return dataUrls;
+};
+
 const gpt3 = async (message, args, sysContext) => {
   const member = message.member;
   const memberId = message.author.id;
@@ -40,8 +73,9 @@ const gpt3 = async (message, args, sysContext) => {
     return commandResponse;
   }
 
-  // add the user's message to the conversation
-  conversation.addMessage('user', userPrompt, message);
+  // add the user's message to the conversation (images sent inline as base64)
+  const imageUrls = await prepareImages(message);
+  conversation.addMessage('user', userPrompt, message, null, { imageUrls });
 
   const toolsToSend = tools.length ? tools : undefined;
 
@@ -168,10 +202,16 @@ const handleCommands = (userPrompt, conversation) => {
   return false;
 };
 
+// use the vision model when any message in the context carries an image
+const hasImages = (messages) =>
+  messages.some((m) =>
+    Array.isArray(m.content) && m.content.some((c) => c.type === 'image_url')
+  );
+
 const createChatCompletion = async (messages, tools, memberId) => {
 
   const params = {
-    model: TEXT_MODEL,
+    model: hasImages(messages) ? VISION_MODEL : TEXT_MODEL,
     messages,
     // temperature: 0.9,
     // max_tokens: 150,
