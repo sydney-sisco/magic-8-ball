@@ -22,10 +22,41 @@ const VOICE = {
   ssmlGender: 'MALE',
 };
 
+// strip markdown, emojis, and URLs so the TTS engine doesn't choke on them
+const sanitizeForTTS = (text) => {
+  return String(text)
+    .replace(/```[\s\S]*?```/g, ' ')                // code blocks
+    .replace(/`([^`]*)`/g, '$1')                     // inline code
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')         // markdown links -> link text
+    .replace(/https?:\/\/\S+/g, ' ')                 // bare URLs
+    .replace(/[*_~#>|]/g, ' ')                       // markdown chars -> spaces
+    .replace(/[\u{1F000}-\u{1FAFF}\u{2B00}-\u{2BFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, '') // emojis
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+// split long text into sentence-based chunks (GCP TTS rejects very long input)
+const splitIntoChunks = (text, maxLen = 1200) => {
+  const sentences = text.split(/(?<=[.!?。！？])\s+/);
+  const chunks = [];
+  let current = '';
+
+  for (const sentence of sentences) {
+    if (current && (current + ' ' + sentence).length > maxLen) {
+      chunks.push(current);
+      current = sentence;
+    } else {
+      current = current ? `${current} ${sentence}` : sentence;
+    }
+  }
+  if (current) chunks.push(current);
+  return chunks;
+};
+
 async function generateAudio(text) {
   try {
     const request = {
-      input: { text },
+      input: { text: sanitizeForTTS(text) },
       voice: VOICE,
       audioConfig: { audioEncoding: 'MP3' },
     };
@@ -43,6 +74,15 @@ async function generateAudio(text) {
     console.error(error);
     throw error;
   }
+}
+
+// sanitize, split into chunks, synthesize each, and queue them for playback
+async function speakText(text) {
+  const chunks = splitIntoChunks(sanitizeForTTS(text));
+  for (const chunk of chunks) {
+    audioQueue.push(await generateAudio(chunk));
+  }
+  return chunks.length;
 }
 
 const audioQueue = [];
@@ -99,8 +139,11 @@ function isPlaying() {
 module.exports = {
   connectToChannel,
   generateAudio,
+  speakText,
   playAudio,
   isPlaying,
+  sanitizeForTTS,
+  splitIntoChunks,
   audioQueue,
   audioPlayer,
 };

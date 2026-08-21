@@ -6,7 +6,7 @@ const { EndBehaviorType } = require('@discordjs/voice');
 const { spawn } = require('node:child_process');
 const prism = require('prism-media');
 const speech = require('@google-cloud/speech');
-const { generateAudio, playAudio, audioQueue, isPlaying } = require('../util/voice.js');
+const { speakText, playAudio, isPlaying } = require('../util/voice.js');
 const { gpt3 } = require('./gpt3.js');
 
 const speechClient = new speech.SpeechClient();
@@ -109,8 +109,8 @@ const startVoiceListener = (connection, { message }) => {
         if (!reply || typeof reply !== 'string') return;
         console.log(`[voice] bot reply: ${reply.slice(0, 200)}`);
 
-        const filename = await generateAudio(reply);
-        audioQueue.push(filename);
+        // sanitize markdown/emoji and chunk long replies so TTS doesn't fail
+        await speakText(reply);
         playAudio(connection);
       } catch (error) {
         console.error('[voice] chatbot/TTS error:', error.message);
