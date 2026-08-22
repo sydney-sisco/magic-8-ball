@@ -13,6 +13,28 @@ const speechClient = new speech.SpeechClient();
 
 const SILENCE_DURATION_MS = 700; // how long of silence ends an utterance
 
+// the bot only responds to utterances containing one of these trigger phrases
+// (comma-separated in VOICE_TRIGGER_PHRASES, default "hey robot")
+const VOICE_TRIGGER_PHRASES = (process.env.VOICE_TRIGGER_PHRASES || 'hey robot')
+  .split(',')
+  .map((s) => s.trim().toLowerCase())
+  .filter(Boolean);
+
+// checks a transcript for the trigger phrase; returns the request text with the
+// trigger stripped out (or null if the utterance wasn't addressed to the bot)
+const extractTriggeredPrompt = (transcript) => {
+  const normalized = transcript.toLowerCase().replace(/\s+/g, ' ').trim();
+  const trigger = VOICE_TRIGGER_PHRASES.find((p) => normalized.includes(p));
+  if (!trigger) return null;
+
+  const prompt = normalized
+    .replace(trigger, ' ')
+    .replace(/^[\s,.:;!?—-]+/, '')
+    .trim();
+
+  return prompt || null; // null when the utterance was just the trigger itself
+};
+
 const subscribers = new Map(); // userId -> { opusStream, decoder, ffmpeg }
 const connectionsWithListener = new WeakSet(); // only attach one listener per connection
 let processingUtterance = false; // don't overlap chatbot turns
@@ -100,10 +122,18 @@ const startVoiceListener = (connection, { message }) => {
       if (!transcript.trim()) return;
       console.log(`[voice] <@${userId}> said: ${transcript}`);
 
+      // only respond when the utterance was addressed to the bot
+      const prompt = extractTriggeredPrompt(transcript);
+      if (!prompt) {
+        console.log('[voice] no trigger phrase, ignoring');
+        return;
+      }
+      console.log(`[voice] triggered request: ${prompt}`);
+
       processingUtterance = true;
       try {
         const chatMessage = makeChatMessage(contextChannelId, userId);
-        chatMessage.content = '!!' + transcript;
+        chatMessage.content = '!!' + prompt;
 
         const reply = await gpt3(chatMessage, [], {});
         if (!reply || typeof reply !== 'string') return;
@@ -123,4 +153,4 @@ const startVoiceListener = (connection, { message }) => {
   });
 };
 
-module.exports = { startVoiceListener };
+module.exports = { startVoiceListener, extractTriggeredPrompt };
